@@ -1,9 +1,84 @@
-import React from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
+import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { router } from 'expo-router';
+import React, { useState } from "react";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 
 export default function Index() {
+  const [balance, setBalance] = useState(2020.15);
+  const [totalSpent, setTotalSpent] = useState(115.00); // Initialize with the current spent amount
+  const [transactions, setTransactions] = useState([
+    {
+      id: '1',
+      title: 'Burger King',
+      category: 'Food',
+      amount: 10.00,
+      date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+      icon: 'hamburger'
+    }
+  ]);
+
+  // Helper function to get icon based on category
+  const getCategoryIcon = (category) => {
+    switch (category.toLowerCase()) {
+      case 'food':
+        return 'hamburger';
+      case 'transport':
+        return 'car';
+      case 'housing':
+        return 'home';
+      case 'entertainment':
+        return 'gamepad';
+      case 'shopping':
+        return 'shopping-bag';
+      case 'health':
+        return 'medkit';
+      default:
+        return 'receipt';
+    }
+  };
+
+    // Helper function to format the date
+    const formatDate = (dateString) => {
+      const date = new Date(dateString);
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+    
+      if (date.toDateString() === today.toDateString()) {
+        return 'Today';
+      }
+      if (date.toDateString() === yesterday.toDateString()) {
+        return 'Yesterday';
+      }
+      return date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric'
+      });
+    };
+  // Listen for new expenses
+  React.useEffect(() => {
+    router.setParams = (params) => {
+      if (params && params.amount) {
+        // Update balance and total spent
+        setBalance(prevBalance => prevBalance - params.amount);
+        setTotalSpent(prevSpent => prevSpent + params.amount);
+        
+        // Add new transaction
+        const newTransaction = {
+          id: Date.now().toString(),
+          title: params.description || params.category,
+          category: params.category,
+          amount: params.amount,
+          date: params.date,
+          icon: getCategoryIcon(params.category)
+        };
+        
+        setTransactions(prev => [newTransaction, ...prev]);
+      }
+    };
+  }, []);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
@@ -29,10 +104,10 @@ export default function Index() {
           {/* Balance Card */}
           <View style={[styles.card, styles.cardSecondary]}>
             <Text style={styles.balanceLabel}>Current Balance</Text>
-            <Text style={styles.balanceValue}>$2,020.15</Text>
+            <Text style={styles.balanceValue}>${balance.toFixed(2)}</Text>
             <View style={styles.balanceRow}>
               <Text style={styles.balanceMeta}>Income: $X,XXX.XX</Text>
-              <Text style={styles.balanceMeta}>Spent: $115.00</Text>
+              <Text style={styles.balanceMeta}>Spent: ${totalSpent.toFixed(2)}</Text>
             </View>
           </View>
 
@@ -45,22 +120,33 @@ export default function Index() {
           {/* Recent Transactions */}
           <Text style={styles.sectionHeader}>Recent Transactions</Text>
 
-          <View style={styles.transactionCard}>
-            <View style={styles.transactionLeft}>
-              <FontAwesome5 name="hamburger" size={18} color="#b36c2e" />
-              <View style={styles.transactionTextWrap}>
-                <Text style={styles.transactionTitle}>Burger King</Text>
-                <Text style={styles.transactionSubtitle}>Food · Yesterday</Text>
-              </View>
-            </View>
-            <Text style={styles.transactionAmount}>-$10.00</Text>
+          <View style={styles.recentContainer}>
+            <ScrollView style={styles.recentList} nestedScrollEnabled={true} showsVerticalScrollIndicator={true}>
+              {transactions.map((transaction) => (
+                <View key={transaction.id} style={styles.transactionCard}>
+                  <View style={styles.transactionLeft}>
+                    <FontAwesome5 name={transaction.icon} size={18} color="#b36c2e" />
+                    <View style={styles.transactionTextWrap}>
+                      <Text style={styles.transactionTitle}>{transaction.title}</Text>
+                      <Text style={styles.transactionSubtitle}>{transaction.category} · {formatDate(transaction.date)}</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.transactionAmount}>-${transaction.amount.toFixed(2)}</Text>
+                </View>
+              ))}
+            </ScrollView>
           </View>
+        </ScrollView>
 
-          {/* Add Expense Button */}
-          <Pressable style={styles.primaryButton}>
+        {/* Fixed Add button (always visible) */}
+        <View style={styles.fixedFooter}>
+          <Pressable
+            style={styles.primaryButton}
+            onPress={() => router.push('/modal')}
+          >
             <Text style={styles.primaryButtonText}>+ Add Expense</Text>
           </Pressable>
-        </ScrollView>
+        </View>
 
         {/* Bottom Navigation (mock) */}
         <View style={styles.tabBar}>
@@ -255,6 +341,21 @@ const styles = StyleSheet.create({
     borderColor: "#e5e7eb",
     backgroundColor: "#fff",
   },
+
+  /* Recent transactions scroll area */
+  recentContainer: {
+    marginBottom: 12,
+  },
+  recentList: {
+    maxHeight: 260,
+  },
+
+  /* Fixed footer so the add button is always visible */
+  fixedFooter: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: '#f7f8fb',
+  },
   tabItem: {
     alignItems: "center",
     gap: 4,
@@ -268,7 +369,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   bottomSpacer: {
-    height: 0,
+    height: 8,
     backgroundColor: "transparent",
   },
 });
