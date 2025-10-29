@@ -7,7 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 export default function Index() {
   const [balance, setBalance] = useState(2020.15);
-  const [totalSpent, setTotalSpent] = useState(115.00); // Initialize with the current spent amount
+  const [totalSpent, setTotalSpent] = useState(10.00); // Initialize with the current spent amount
   const [transactions, setTransactions] = useState([
     {
       id: '1',
@@ -43,17 +43,17 @@ export default function Index() {
   const getCategoryColor = (category) => {
     switch (category.toLowerCase()) {
       case 'food':
-        return '#75ecbfff'; // Green for food
+        return '#49e4a8ff'; // Green for food
       case 'transport':
-        return '#45B7D1'; // Blue for transport
+        return '#3c89fdff'; // Blue for transport
       case 'housing':
         return '#ff3c3cff'; // Red for housing
       case 'entertainment':
         return '#6d34f3ff'; // Purple for entertainment
       case 'shopping':
-        return '#f7e29fff'; // Yellow for shopping
+        return '#fada71ff'; // Yellow for shopping
       case 'health':
-        return '#DDA0DD'; // Purple for health
+        return '#f889f8ff'; // Pink for health
       default:
         return '#c48220ff'; // Default Brown
     }
@@ -129,6 +129,7 @@ export default function Index() {
           </LinearGradient>
 
           {/* Balance Card */}
+          <Pressable onPress={() => router.push({ pathname: '/balance', params: { tx: JSON.stringify(transactions), balance: String(balance), spent: String(totalSpent) } })}>
           <LinearGradient
             colors={["#6F8DF1", "#9F72DB"]}
             start={{ x: 0, y: 0 }}
@@ -142,6 +143,7 @@ export default function Index() {
               <Text style={styles.balanceMeta}>Spent: ${totalSpent.toFixed(2)}</Text>
             </View>
           </LinearGradient>
+          </Pressable>
 
           {/* Budget Chart Placeholder */}
           <View style={styles.chartCard}>

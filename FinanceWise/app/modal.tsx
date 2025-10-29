@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const categories = [
+export const categories = [
   { id: 'food', icon: '🍔', label: 'Food' },
   { id: 'transport', icon: '🚗', label: 'Transport' },
   { id: 'housing', icon: '🏠', label: 'Housing' },

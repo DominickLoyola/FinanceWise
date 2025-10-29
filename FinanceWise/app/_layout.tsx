@@ -16,6 +16,12 @@ export default function Layout() {
         }}
       />
       <Stack.Screen
+        name="balance"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
         name="modal"
         options={{
           presentation: 'modal',
