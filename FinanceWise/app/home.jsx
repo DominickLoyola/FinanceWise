@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import React, { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function Index() {
   const [balance, setBalance] = useState(2020.15);
@@ -42,19 +43,19 @@ export default function Index() {
   const getCategoryColor = (category) => {
     switch (category.toLowerCase()) {
       case 'food':
-        return '#b36c2e'; // Brown for food
+        return '#75ecbfff'; // Green for food
       case 'transport':
-        return '#ff3c3cff'; // Teal for transport
+        return '#45B7D1'; // Blue for transport
       case 'housing':
-        return '#45B7D1'; // Blue for housing
+        return '#ff3c3cff'; // Red for housing
       case 'entertainment':
-        return '#96CEB4'; // Green for entertainment
+        return '#6d34f3ff'; // Purple for entertainment
       case 'shopping':
-        return '#FFEAA7'; // Yellow for shopping
+        return '#f7e29fff'; // Yellow for shopping
       case 'health':
         return '#DDA0DD'; // Purple for health
       default:
-        return '#d400ffff'; // Default purple
+        return '#c48220ff'; // Default Brown
     }
   };
 
@@ -100,14 +101,20 @@ export default function Index() {
   }, []);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.container}>
         {/* App Title */}
         <Text style={styles.title}>FinanceWise</Text>
 
+
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {/* Welcome Card */}
-          <View style={[styles.card, styles.cardPrimary]}>
+          <LinearGradient
+            colors={["#3960E3", "#843CE1"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.card, styles.cardPrimary]}
+          >
             <Text style={styles.welcomeTitle}>Welcome back, User! 👋</Text>
             <Text style={styles.welcomeSubtitle}>
               You're doing great! Let's continue your financial journey.
@@ -119,17 +126,22 @@ export default function Index() {
             <View style={styles.progressBarBg}>
               <View style={styles.progressBarFill} />
             </View>
-          </View>
+          </LinearGradient>
 
           {/* Balance Card */}
-          <View style={[styles.card, styles.cardSecondary]}>
+          <LinearGradient
+            colors={["#6F8DF1", "#9F72DB"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.card, styles.cardSecondary]}
+          >
             <Text style={styles.balanceLabel}>Current Balance</Text>
             <Text style={styles.balanceValue}>${balance.toFixed(2)}</Text>
             <View style={styles.balanceRow}>
               <Text style={styles.balanceMeta}>Income: $X,XXX.XX</Text>
               <Text style={styles.balanceMeta}>Spent: ${totalSpent.toFixed(2)}</Text>
             </View>
-          </View>
+          </LinearGradient>
 
           {/* Budget Chart Placeholder */}
           <View style={styles.chartCard}>
@@ -208,14 +220,15 @@ const styles = StyleSheet.create({
   },
   title: {
     textAlign: "center",
-    fontSize: 22,
-    fontWeight: "700",
+    fontSize: 35,
+    fontWeight: "600",
     marginTop: 15, // extra line so title isn't too close to top of phone
-    marginBottom: 8,
+    marginBottom: 0,
   },
   scrollContent: {
     paddingHorizontal: 16,
     paddingBottom: 16,
+    paddingTop: 15,
   },
   card: {
     borderRadius: 16,
@@ -223,10 +236,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   cardPrimary: {
-    backgroundColor: "#5b7cfa",
   },
   cardSecondary: {
-    backgroundColor: "#8a7cf6",
   },
   welcomeTitle: {
     color: "#fff",
@@ -248,6 +259,7 @@ const styles = StyleSheet.create({
   progressLabel: {
     color: "#eef2ff",
     fontSize: 20,
+    fontWeight: "600",
   },
   progressValue: {
     color: "#eef2ff",
@@ -287,7 +299,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   chartCard: {
-    backgroundColor: "#fff",
     borderRadius: 16,
     padding: 20,
     alignItems: "center",
@@ -345,19 +356,23 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     alignItems: "center",
     marginTop: 8,
-    marginBottom: 16,
+    marginBottom: 64,
   },
   primaryButtonText: {
     color: "#fff",
     fontWeight: "700",
   },
   tabBar: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-    paddingTop: 5,
-    paddingBottom: 0,
-    borderTopWidth: 3,
+    paddingTop: 4,
+    paddingBottom: 18,
+    borderTopWidth: 1,
     borderColor: "#e5e7eb",
     backgroundColor: "#fff",
   },
@@ -389,7 +404,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   bottomSpacer: {
-    height: 8,
+    height: 0,
     backgroundColor: "transparent",
   },
 });

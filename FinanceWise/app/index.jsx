@@ -49,6 +49,7 @@ const styles = StyleSheet.create({
     width: 375,
     height: 375,
     marginVertical: 0,
+    marginLeft: 14,
   },
   brandRow: {
     flexDirection: 'row',
