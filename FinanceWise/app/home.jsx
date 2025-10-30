@@ -116,9 +116,6 @@ export default function Index() {
             style={[styles.card, styles.cardPrimary]}
           >
             <Text style={styles.welcomeTitle}>Welcome back, User! 👋</Text>
-            <Text style={styles.welcomeSubtitle}>
-              You're doing great! Let's continue your financial journey.
-            </Text>
             <View style={styles.progressContainer}>
               <Text style={styles.progressLabel}>Progress this week</Text>
               <Text style={styles.progressValue}>75%</Text>
