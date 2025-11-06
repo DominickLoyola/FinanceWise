@@ -208,7 +208,7 @@ export default function Index() {
           </Pressable>
         </View>
 
-        {/* Bottom Navigation (mock) */}
+        {/* Bottom Navigation */}
         <View style={styles.tabBar}>
           <View style={styles.tabItem}>
             <Ionicons name="home" size={22} color="#1f6bff" />
