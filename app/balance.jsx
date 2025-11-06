@@ -146,14 +146,14 @@ export default function Balance() {
 
       {/* Bottom Navigation (same visual as home) */}
       <View style={styles.tabBar}>
-        <View style={styles.tabItem}>
-          <Ionicons name="home" size={22} color="#1f6bff" />
-          <Text style={[styles.tabLabel, styles.tabLabelActive]}>Home</Text>
-        </View>
-        <View style={styles.tabItem}>
+        <Pressable style={styles.tabItem} onPress={() => router.push("/home")}>
+          <Ionicons name="home" size={22} color="#777" />
+          <Text style={styles.tabLabel}>Home</Text>
+        </Pressable>
+        <Pressable style={styles.tabItem} onPress={() => router.push("/lessons")}>
           <Ionicons name="book" size={22} color="#777" />
           <Text style={styles.tabLabel}>Learn</Text>
-        </View>
+        </Pressable>
         <View style={styles.tabItem}>
           <Ionicons name="sparkles" size={22} color="#777" />
           <Text style={styles.tabLabel}>AI Advisor</Text>

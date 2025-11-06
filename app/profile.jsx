@@ -21,7 +21,7 @@ export default function Profile() {
   const [userEmail, setUserEmail] = useState("")
 
   useEffect(() => {
-    // Get current user info from Firebase
+    {/* Get current user info from Firebase */}
     const user = auth.currentUser
     if (user) {
       setUserName(user.displayName || "User")
@@ -29,7 +29,7 @@ export default function Profile() {
     }
   }, [])
 
-  // Function for user's initials
+  {/* Function for user's initials */}
   const getInitials = (name) => {
     if (!name) return "U"
     const names = name.trim().split(" ")
@@ -66,7 +66,7 @@ export default function Profile() {
         <Text style={styles.title}>FinanceWise</Text>
 
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          // Profile Header
+          {/* Profile Header */}
           <View style={styles.profileSection}>
             <View style={styles.profilePictureContainer}>
               <View style={styles.profilePicture}>
@@ -79,7 +79,7 @@ export default function Profile() {
             </View>
           </View>
 
-          // Profile Menu Items
+          {/* Profile Menu Items */}
           <View style={styles.menuContainer}>
             {menuItems.map((item) => (
               <Pressable
@@ -120,7 +120,7 @@ export default function Profile() {
           </View>
         </ScrollView>
 
-        // Bottom Navigation 
+        {/* Bottom Navigation */}
         <View style={styles.tabBar}>
           <Pressable style={styles.tabItem} onPress={() => router.push("/home")}>
             <Ionicons name="home" size={22} color="#777" />
