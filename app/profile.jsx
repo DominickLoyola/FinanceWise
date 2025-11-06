@@ -1,6 +1,7 @@
 "use client"
 
 import { Ionicons } from "@expo/vector-icons"
+import { LinearGradient } from "expo-linear-gradient"
 import { router } from "expo-router"
 import { signOut } from "firebase/auth"
 import { useContext, useEffect, useState } from "react"
@@ -62,12 +63,17 @@ export default function Profile() {
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <View style={styles.container}>
-        // Header
+        {/* Header */}
         <Text style={styles.title}>FinanceWise</Text>
 
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {/* Profile Header */}
-          <View style={styles.profileSection}>
+          <LinearGradient
+            colors={["#6F8DF1", "#9F72DB"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.profileSection}
+          >
             <View style={styles.profilePictureContainer}>
               <View style={styles.profilePicture}>
                 <Text style={styles.profileInitials}>{getInitials(userName)}</Text>
@@ -77,7 +83,7 @@ export default function Profile() {
               <Text style={styles.profileName}>{userName}</Text>
               <Text style={styles.profileEmail}>{userEmail}</Text>
             </View>
-          </View>
+          </LinearGradient>
 
           {/* Profile Menu Items */}
           <View style={styles.menuContainer}>
@@ -172,12 +178,9 @@ const styles = StyleSheet.create({
   profileSection: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
     borderRadius: 16,
     padding: 20,
     marginBottom: 24,
-    borderWidth: 1,
-    borderColor: "#e9ecf5",
   },
   profilePictureContainer: {
     marginRight: 16,
@@ -186,11 +189,11 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "#3960E3",
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 3,
-    borderColor: "#e9ecf5",
+    borderColor: "rgba(255, 255, 255, 0.5)",
   },
   profileInitials: {
     fontSize: 32,
@@ -203,12 +206,12 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 24,
     fontWeight: "700",
-    color: "#111",
+    color: "#fff",
     marginBottom: 4,
   },
   profileEmail: {
     fontSize: 14,
-    color: "#6b7280",
+    color: "rgba(255, 255, 255, 0.9)",
     fontWeight: "500",
   },
   menuContainer: {
