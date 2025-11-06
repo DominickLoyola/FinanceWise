@@ -1,12 +1,11 @@
-import React from 'react';
-import { StyleSheet, View, Text, ScrollView, Pressable } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLocalSearchParams } from 'expo-router';
-import { Svg, G, Path, Circle } from 'react-native-svg';
-import { categories as modalCategories } from './modal';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router, useLocalSearchParams } from 'expo-router';
+import React from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Circle, G, Path, Svg } from 'react-native-svg';
+import { categories as modalCategories } from './modal';
 
 function getCategoryColor(category) {
   switch (category.toLowerCase()) {
@@ -163,10 +162,10 @@ export default function Balance() {
           <Ionicons name="flag" size={22} color="#777" />
           <Text style={styles.tabLabel}>Goals</Text>
         </View>
-        <View style={styles.tabItem}>
+        <Pressable style={styles.tabItem} onPress={() => router.push("/profile")}>
           <Ionicons name="person" size={22} color="#777" />
           <Text style={styles.tabLabel}>Profile</Text>
-        </View>
+        </Pressable>
       </View>
     </SafeAreaView>
   );

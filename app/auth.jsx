@@ -1,28 +1,28 @@
 "use client"
 
-import { useContext, useState } from "react"
-import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  StyleSheet,
-  SafeAreaView,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  Image,
-} from "react-native"
-import { LinearGradient } from "expo-linear-gradient"
 import { Ionicons } from "@expo/vector-icons"
-import { AuthContext } from "../contexts/AuthContext"
+import { LinearGradient } from "expo-linear-gradient"
 import { router } from "expo-router"
-import { auth } from "./firebaseConfig" 
 import {
-  signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth"
+import { useContext, useState } from "react"
+import {
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native"
+import { AuthContext } from "../contexts/AuthContext"
+import { auth } from "./firebaseConfig"
 
 export default function Auth() {
   const { login } = useContext(AuthContext)

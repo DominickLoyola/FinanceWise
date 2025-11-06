@@ -1,13 +1,13 @@
 "use client"
 
 import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons"
+import { LinearGradient } from "expo-linear-gradient"
 import { router } from "expo-router"
-import React, { useState, useEffect } from "react"
+import { doc, getDoc } from "firebase/firestore"
+import React, { useEffect, useState } from "react"
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { LinearGradient } from "expo-linear-gradient"
 import { auth, db } from "./firebaseConfig"
-import { doc, getDoc } from "firebase/firestore"
 
 export default function Index() {
   const [balance, setBalance] = useState(2020.15)
@@ -226,10 +226,10 @@ export default function Index() {
             <Ionicons name="flag" size={22} color="#777" />
             <Text style={styles.tabLabel}>Goals</Text>
           </View>
-          <View style={styles.tabItem}>
+          <Pressable style={styles.tabItem} onPress={() => router.push("/profile")}>
             <Ionicons name="person" size={22} color="#777" />
             <Text style={styles.tabLabel}>Profile</Text>
-          </View>
+          </Pressable>
         </View>
         <View style={styles.bottomSpacer} />
       </View>

@@ -1,9 +1,8 @@
 "use client"
 
-import { Stack } from "expo-router"
-import { AuthProvider, AuthContext } from "../contexts/AuthContext"
+import { router, Stack } from "expo-router"
 import { useContext, useEffect, useState } from "react"
-import { router } from "expo-router"
+import { AuthContext, AuthProvider } from "../contexts/AuthContext"
 
 function RootLayoutNav() {
   const { isLoggedIn } = useContext(AuthContext)
@@ -29,6 +28,7 @@ function RootLayoutNav() {
       <Stack.Screen name="home" options={{ headerShown: false }} />
       <Stack.Screen name="balance" options={{ headerShown: false }} />
       <Stack.Screen name="lessons" options={{ headerShown: false }} />
+      <Stack.Screen name="profile" options={{ headerShown: false }} />
       <Stack.Screen name="modal" options={{ presentation: "modal", headerShown: false }} />
     </Stack>
   )
