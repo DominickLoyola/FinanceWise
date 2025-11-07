@@ -7,8 +7,6 @@ export default function Start() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-
-
         <Image
           source={require('../assets/images/FW-logo.png')}
           style={styles.logo}
@@ -16,7 +14,7 @@ export default function Start() {
         />
 
         <Pressable
-          onPress={() => router.replace('/home')}
+          onPress={() => router.push('/auth')}
           style={({ pressed }) => [styles.enterButton, pressed && styles.enterButtonPressed]}
         >
           <LinearGradient
@@ -51,21 +49,6 @@ const styles = StyleSheet.create({
     marginVertical: 0,
     marginLeft: 14,
   },
-  brandRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: 4,
-  },
-  brandPrimary: {
-    fontSize: 40,
-    fontWeight: '900',
-    color: '#2da4ff', // left side of gradient look
-  },
-  brandSecondary: {
-    fontSize: 40,
-    fontWeight: '900',
-    color: '#1b3aa9', // darker blue to emulate gradient end
-  },
   enterButton: {
     borderRadius: 28,
     marginTop: 16,
@@ -78,12 +61,6 @@ const styles = StyleSheet.create({
   enterButtonPressed: {
     transform: [{ scale: 0.98 }],
   },
-  enterText: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: 'white',
-    textAlign: 'center',
-  },
   gradientButton: {
     paddingVertical: 12,
     paddingHorizontal: 28,
@@ -91,6 +68,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  enterText: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: 'white',
+    textAlign: 'center',
+  },
 });
-
-

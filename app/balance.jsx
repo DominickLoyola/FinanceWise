@@ -7,6 +7,8 @@ import { categories as modalCategories } from './modal';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { auth, db } from './firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
 
 function getCategoryColor(category) {
   switch (category.toLowerCase()) {
@@ -41,11 +43,39 @@ function describeArc(cx, cy, r, startAngle, endAngle) {
 
 export default function Balance() {
   const params = useLocalSearchParams();
+  const [balance, setBalance] = React.useState(0);
+  const [annualIncome, setAnnualIncome] = React.useState(0);
   const transactions = React.useMemo(() => {
     try { return JSON.parse(params.tx || '[]'); } catch { return []; }
   }, [params.tx]);
-  const balance = parseFloat(params.balance || '0');
   const spent = parseFloat(params.spent || '0');
+
+  // Fetch balance and income from Firestore (same source as home.jsx)
+  React.useEffect(() => {
+    async function fetchUserData() {
+      if (!auth.currentUser) return;
+      try {
+        const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          if (userData.currentBalance !== undefined && userData.currentBalance !== null) {
+            setBalance(userData.currentBalance);
+          }
+          if (userData.annualIncome !== undefined && userData.annualIncome !== null) {
+            setAnnualIncome(userData.annualIncome);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
+        // Fallback to params if Firestore fails
+        const paramBalance = parseFloat(params.balance || '0');
+        if (paramBalance > 0) {
+          setBalance(paramBalance);
+        }
+      }
+    }
+    fetchUserData();
+  }, [params.balance]);
 
   const categoryTotals = React.useMemo(() => {
     const totals = {};
@@ -103,10 +133,10 @@ export default function Balance() {
           style={styles.balanceCard}
         >
           <Text style={styles.balanceLabel}>Current Balance</Text>
-          <Text style={styles.balanceValue}>${balance.toFixed(2)}</Text>
+          <Text style={styles.balanceValue}>${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
           <View style={styles.balanceMetaRow}>
-            <Text style={styles.balanceMeta}>Income: $X,XXX.XX</Text>
-            <Text style={styles.balanceMeta}>Spent: ${spent.toFixed(2)}</Text>
+            <Text style={styles.balanceMeta}>Income: ${annualIncome.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
+            <Text style={styles.balanceMeta}>Spent: ${spent.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
           </View>
         </LinearGradient>
 

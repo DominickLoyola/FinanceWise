@@ -1,5 +1,3 @@
-"use client"
-
 import { FontAwesome5, Ionicons } from "@expo/vector-icons"
 import { useState } from "react"
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native"

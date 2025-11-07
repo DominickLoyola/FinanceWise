@@ -1,5 +1,3 @@
-"use client"
-
 import { useContext, useState } from "react"
 import {
   View,
@@ -11,18 +9,18 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Image,
 } from "react-native"
 import { LinearGradient } from "expo-linear-gradient"
 import { Ionicons } from "@expo/vector-icons"
 import { AuthContext } from "../contexts/AuthContext"
 import { router } from "expo-router"
-import { auth } from "./firebaseConfig" 
+import { auth, db } from "./firebaseConfig" 
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth"
+import { doc, setDoc } from "firebase/firestore"
 
 export default function Auth() {
   const { login } = useContext(AuthContext)
@@ -119,6 +117,15 @@ export default function Auth() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       await updateProfile(userCredential.user, { displayName: name })
+      
+      // Save user data to Firestore
+      await setDoc(doc(db, "users", userCredential.user.uid), {
+        currentBalance: parseFloat(currentBalance),
+        annualIncome: parseFloat(annualIncome),
+        name: name,
+        email: email,
+      })
+      
       login()
       router.replace("/home")
     } catch (error) {
@@ -158,11 +165,6 @@ export default function Auth() {
         >
           {/* Logo Section */}
           <View style={styles.logoSection}>
-            <Image
-              source={require("../assets/images/FW-logo.png")}
-              style={styles.logo}
-              resizeMode="contain"
-            />
             <Text style={styles.appName}>FinanceWise</Text>
             <Text style={styles.tagline}>Manage Your Money Wisely</Text>
           </View>
@@ -449,11 +451,6 @@ const styles = StyleSheet.create({
   logoSection: {
     alignItems: "center",
     marginVertical: 24,
-  },
-  logo: {
-    width: 120,
-    height: 120,
-    marginBottom: 12,
   },
   appName: {
     fontSize: 32,

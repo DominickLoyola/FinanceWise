@@ -1,31 +1,22 @@
-"use client"
-
 import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons"
+import { LinearGradient } from "expo-linear-gradient"
 import { router } from "expo-router"
-import React, { useState, useEffect } from "react"
+import { doc, getDoc, updateDoc } from "firebase/firestore"
+import React, { useEffect, useState } from "react"
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { LinearGradient } from "expo-linear-gradient"
 import { auth, db } from "./firebaseConfig"
-import { doc, getDoc } from "firebase/firestore"
 
 export default function Index() {
-  const [balance, setBalance] = useState(2020.15)
-  const [totalSpent, setTotalSpent] = useState(10.0) // Initialize with the current spent amount
-  const [transactions, setTransactions] = useState([
-    {
-      id: "1",
-      title: "Burger King",
-      category: "Food",
-      amount: 10.0,
-      date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-      icon: "hamburger",
-    },
-  ])
+  const [balance, setBalance] = useState(0)
+  const [totalSpent, setTotalSpent] = useState(0)
+  const [transactions, setTransactions] = useState([])
+  const [userName, setUserName] = useState("")
+  const [annualIncome, setAnnualIncome] = useState(0)
 
-  // Firestore fetch for user current balance
+  // Firestore fetch for user data (balance, name, income)
   useEffect(() => {
-    async function fetchUserBalance() {
+    async function fetchUserData() {
       if (!auth.currentUser) return
       try {
         const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid))
@@ -34,12 +25,18 @@ export default function Index() {
           if (userData.currentBalance !== undefined && userData.currentBalance !== null) {
             setBalance(userData.currentBalance)
           }
+          if (userData.name) {
+            setUserName(userData.name)
+          }
+          if (userData.annualIncome !== undefined && userData.annualIncome !== null) {
+            setAnnualIncome(userData.annualIncome)
+          }
         }
       } catch (error) {
-        console.error("Failed to fetch user balance:", error)
+        console.error("Failed to fetch user data:", error)
       }
     }
-    fetchUserBalance()
+    fetchUserData()
   }, [])
 
   // Helper function to get icon based on category
@@ -103,10 +100,23 @@ export default function Index() {
 
   // Listen for new expenses
   React.useEffect(() => {
-    router.setParams = (params) => {
+    router.setParams = async (params) => {
       if (params && params.amount) {
         // Update balance and total spent
-        setBalance((prevBalance) => prevBalance - params.amount)
+        setBalance((prevBalance) => {
+          const newBalance = prevBalance - params.amount
+          
+          // Save updated balance to Firestore
+          if (auth.currentUser) {
+            updateDoc(doc(db, "users", auth.currentUser.uid), {
+              currentBalance: newBalance,
+            }).catch((error) => {
+              console.error("Failed to update balance in Firestore:", error)
+            })
+          }
+          
+          return newBalance
+        })
         setTotalSpent((prevSpent) => prevSpent + params.amount)
 
         // Add new transaction
@@ -138,7 +148,7 @@ export default function Index() {
             end={{ x: 1, y: 1 }}
             style={[styles.card, styles.cardPrimary]}
           >
-            <Text style={styles.welcomeTitle}>Welcome back, User! 👋</Text>
+            <Text style={styles.welcomeTitle}>Welcome, {userName || "User"}! 👋</Text>
             <View style={styles.progressContainer}>
               <Text style={styles.progressLabel}>Progress this week</Text>
               <Text style={styles.progressValue}>75%</Text>
@@ -164,10 +174,10 @@ export default function Index() {
               style={[styles.card, styles.cardSecondary]}
             >
               <Text style={styles.balanceLabel}>Current Balance</Text>
-              <Text style={styles.balanceValue}>${balance.toFixed(2)}</Text>
+              <Text style={styles.balanceValue}>${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
               <View style={styles.balanceRow}>
-                <Text style={styles.balanceMeta}>Income: $X,XXX.XX</Text>
-                <Text style={styles.balanceMeta}>Spent: ${totalSpent.toFixed(2)}</Text>
+                <Text style={styles.balanceMeta}>Income: ${annualIncome.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
+                <Text style={styles.balanceMeta}>Spent: ${totalSpent.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
               </View>
             </LinearGradient>
           </Pressable>
@@ -372,9 +382,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#1f6bff",
     borderRadius: 22,
     paddingVertical: 12,
+    paddingHorizontal: 24,
     alignItems: "center",
+    alignSelf: "center",
     marginTop: 8,
-    marginBottom: 64,
+    marginBottom: 75,
+    minWidth: 325,
+    maxWidth: 325,
   },
   primaryButtonText: {
     color: "#fff",
