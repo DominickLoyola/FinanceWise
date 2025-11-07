@@ -1,26 +1,28 @@
-import { useContext, useState } from "react"
-import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  StyleSheet,
-  SafeAreaView,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native"
-import { LinearGradient } from "expo-linear-gradient"
+"use client"
+
 import { Ionicons } from "@expo/vector-icons"
-import { AuthContext } from "../contexts/AuthContext"
+import { LinearGradient } from "expo-linear-gradient"
 import { router } from "expo-router"
-import { auth, db } from "./firebaseConfig" 
 import {
-  signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth"
 import { doc, setDoc } from "firebase/firestore"
+import { useContext, useState } from "react"
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View
+} from "react-native"
+import { AuthContext } from "../contexts/AuthContext"
+import { auth, db } from "./firebaseConfig"
 
 export default function Auth() {
   const { login } = useContext(AuthContext)

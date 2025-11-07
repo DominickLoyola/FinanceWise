@@ -218,7 +218,7 @@ export default function Index() {
           </Pressable>
         </View>
 
-        {/* Bottom Navigation (mock) */}
+        {/* Bottom Navigation */}
         <View style={styles.tabBar}>
           <View style={styles.tabItem}>
             <Ionicons name="home" size={22} color="#1f6bff" />
@@ -236,10 +236,10 @@ export default function Index() {
             <Ionicons name="flag" size={22} color="#777" />
             <Text style={styles.tabLabel}>Goals</Text>
           </View>
-          <View style={styles.tabItem}>
+          <Pressable style={styles.tabItem} onPress={() => router.push("/profile")}>
             <Ionicons name="person" size={22} color="#777" />
             <Text style={styles.tabLabel}>Profile</Text>
-          </View>
+          </Pressable>
         </View>
         <View style={styles.bottomSpacer} />
       </View>

@@ -1,8 +1,9 @@
 import { FontAwesome5, Ionicons } from "@expo/vector-icons"
+import { LinearGradient } from "expo-linear-gradient"
+import { router } from "expo-router"
 import { useState } from "react"
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { LinearGradient } from "expo-linear-gradient"
 
 export default function Lessons() {
   const [selectedLesson, setSelectedLesson] = useState(null)
@@ -398,10 +399,10 @@ Points:
 
         {/* Bottom Navigation */}
         <View style={styles.tabBar}>
-          <View style={styles.tabItem}>
+          <Pressable style={styles.tabItem} onPress={() => router.push("/home")}>
             <Ionicons name="home" size={22} color="#777" />
             <Text style={styles.tabLabel}>Home</Text>
-          </View>
+          </Pressable>
           <View style={styles.tabItem}>
             <Ionicons name="book" size={22} color="#1f6bff" />
             <Text style={[styles.tabLabel, styles.tabLabelActive]}>Learn</Text>
@@ -414,10 +415,10 @@ Points:
             <Ionicons name="flag" size={22} color="#777" />
             <Text style={styles.tabLabel}>Goals</Text>
           </View>
-          <View style={styles.tabItem}>
+          <Pressable style={styles.tabItem} onPress={() => router.push("/profile")}>
             <Ionicons name="person" size={22} color="#777" />
             <Text style={styles.tabLabel}>Profile</Text>
-          </View>
+          </Pressable>
         </View>
 
         <View style={styles.bottomSpacer} />

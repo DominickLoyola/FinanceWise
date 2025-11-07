@@ -1,14 +1,13 @@
-import React from 'react';
-import { StyleSheet, View, Text, ScrollView, Pressable } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLocalSearchParams } from 'expo-router';
-import { Svg, G, Path, Circle } from 'react-native-svg';
-import { categories as modalCategories } from './modal';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { auth, db } from './firebaseConfig';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router, useLocalSearchParams } from 'expo-router';
 import { doc, getDoc } from 'firebase/firestore';
+import React from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Circle, G, Path, Svg } from 'react-native-svg';
+import { auth, db } from './firebaseConfig';
+import { categories as modalCategories } from './modal';
 
 function getCategoryColor(category) {
   switch (category.toLowerCase()) {
@@ -177,14 +176,14 @@ export default function Balance() {
 
       {/* Bottom Navigation (same visual as home) */}
       <View style={styles.tabBar}>
-        <View style={styles.tabItem}>
-          <Ionicons name="home" size={22} color="#1f6bff" />
-          <Text style={[styles.tabLabel, styles.tabLabelActive]}>Home</Text>
-        </View>
-        <View style={styles.tabItem}>
+        <Pressable style={styles.tabItem} onPress={() => router.push("/home")}>
+          <Ionicons name="home" size={22} color="#777" />
+          <Text style={styles.tabLabel}>Home</Text>
+        </Pressable>
+        <Pressable style={styles.tabItem} onPress={() => router.push("/lessons")}>
           <Ionicons name="book" size={22} color="#777" />
           <Text style={styles.tabLabel}>Learn</Text>
-        </View>
+        </Pressable>
         <View style={styles.tabItem}>
           <Ionicons name="sparkles" size={22} color="#777" />
           <Text style={styles.tabLabel}>AI Advisor</Text>
@@ -193,10 +192,10 @@ export default function Balance() {
           <Ionicons name="flag" size={22} color="#777" />
           <Text style={styles.tabLabel}>Goals</Text>
         </View>
-        <View style={styles.tabItem}>
+        <Pressable style={styles.tabItem} onPress={() => router.push("/profile")}>
           <Ionicons name="person" size={22} color="#777" />
           <Text style={styles.tabLabel}>Profile</Text>
-        </View>
+        </Pressable>
       </View>
     </SafeAreaView>
   );
