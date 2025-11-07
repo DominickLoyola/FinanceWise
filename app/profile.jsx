@@ -6,13 +6,13 @@ import { router } from "expo-router"
 import { signOut } from "firebase/auth"
 import { useContext, useEffect, useState } from "react"
 import {
-    Pressable,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native"
+import { SafeAreaView } from "react-native-safe-area-context"
 import { AuthContext } from "../contexts/AuthContext"
 import { auth } from "./firebaseConfig"
 

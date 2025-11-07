@@ -1,11 +1,70 @@
 import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
-import { router } from "expo-router"
-import { doc, getDoc, updateDoc } from "firebase/firestore"
-import React, { useEffect, useState } from "react"
+import { router, useFocusEffect } from "expo-router"
+import { collection, doc, getDoc, getDocs, orderBy, query } from "firebase/firestore"
+import React, { useCallback, useEffect, useState } from "react"
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { auth, db } from "./firebaseConfig"
+
+// Helper function to get icon based on category
+const getCategoryIcon = (category) => {
+  switch (category.toLowerCase()) {
+    case "food":
+      return "hamburger"
+    case "transport":
+      return "car"
+    case "housing":
+      return "home"
+    case "entertainment":
+      return "gamepad"
+    case "shopping":
+      return "shopping-bag"
+    case "health":
+      return "medkit"
+    default:
+      return "receipt"
+  }
+}
+
+// Helper function to get color based on category
+const getCategoryColor = (category) => {
+  switch (category.toLowerCase()) {
+    case "food":
+      return "#49e4a8ff" // Green for food
+    case "transport":
+      return "#3c89fdff" // Blue for transport
+    case "housing":
+      return "#ff3c3cff" // Red for housing
+    case "entertainment":
+      return "#6d34f3ff" // Purple for entertainment
+    case "shopping":
+      return "#fada71ff" // Yellow for shopping
+    case "health":
+      return "#f889f8ff" // Pink for health
+    default:
+      return "#c48220ff" // Default Brown
+  }
+}
+
+// Helper function to format the date
+const formatDate = (dateString) => {
+  const date = new Date(dateString)
+  const today = new Date()
+  const yesterday = new Date(today)
+  yesterday.setDate(yesterday.getDate() - 1)
+
+  if (date.toDateString() === today.toDateString()) {
+    return "Today"
+  }
+  if (date.toDateString() === yesterday.toDateString()) {
+    return "Yesterday"
+  }
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  })
+}
 
 export default function Index() {
   const [balance, setBalance] = useState(0)
@@ -14,125 +73,65 @@ export default function Index() {
   const [userName, setUserName] = useState("")
   const [annualIncome, setAnnualIncome] = useState(0)
 
-  // Firestore fetch for user data (balance, name, income)
-  useEffect(() => {
-    async function fetchUserData() {
-      if (!auth.currentUser) return
-      try {
-        const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid))
-        if (userDoc.exists()) {
-          const userData = userDoc.data()
-          if (userData.currentBalance !== undefined && userData.currentBalance !== null) {
-            setBalance(userData.currentBalance)
-          }
-          if (userData.name) {
-            setUserName(userData.name)
-          }
-          if (userData.annualIncome !== undefined && userData.annualIncome !== null) {
-            setAnnualIncome(userData.annualIncome)
-          }
+  // Fetch user data and expenses from Firestore
+  const fetchUserDataAndExpenses = useCallback(async () => {
+    if (!auth.currentUser) return
+    try {
+      const userDocRef = doc(db, "users", auth.currentUser.uid)
+      const userDoc = await getDoc(userDocRef)
+      
+      if (userDoc.exists()) {
+        const userData = userDoc.data()
+        if (userData.currentBalance !== undefined && userData.currentBalance !== null) {
+          setBalance(userData.currentBalance)
         }
-      } catch (error) {
-        console.error("Failed to fetch user data:", error)
+        if (userData.name) {
+          setUserName(userData.name)
+        }
+        if (userData.annualIncome !== undefined && userData.annualIncome !== null) {
+          setAnnualIncome(userData.annualIncome)
+        }
+        if (userData.totalSpent !== undefined && userData.totalSpent !== null) {
+          setTotalSpent(userData.totalSpent)
+        }
       }
-    }
-    fetchUserData()
-  }, [])
 
-  // Helper function to get icon based on category
-  const getCategoryIcon = (category) => {
-    switch (category.toLowerCase()) {
-      case "food":
-        return "hamburger"
-      case "transport":
-        return "car"
-      case "housing":
-        return "home"
-      case "entertainment":
-        return "gamepad"
-      case "shopping":
-        return "shopping-bag"
-      case "health":
-        return "medkit"
-      default:
-        return "receipt"
-    }
-  }
-
-  // Helper function to get color based on category
-  const getCategoryColor = (category) => {
-    switch (category.toLowerCase()) {
-      case "food":
-        return "#49e4a8ff" // Green for food
-      case "transport":
-        return "#3c89fdff" // Blue for transport
-      case "housing":
-        return "#ff3c3cff" // Red for housing
-      case "entertainment":
-        return "#6d34f3ff" // Purple for entertainment
-      case "shopping":
-        return "#fada71ff" // Yellow for shopping
-      case "health":
-        return "#f889f8ff" // Pink for health
-      default:
-        return "#c48220ff" // Default Brown
-    }
-  }
-
-  // Helper function to format the date
-  const formatDate = (dateString) => {
-    const date = new Date(dateString)
-    const today = new Date()
-    const yesterday = new Date(today)
-    yesterday.setDate(yesterday.getDate() - 1)
-
-    if (date.toDateString() === today.toDateString()) {
-      return "Today"
-    }
-    if (date.toDateString() === yesterday.toDateString()) {
-      return "Yesterday"
-    }
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    })
-  }
-
-  // Listen for new expenses
-  React.useEffect(() => {
-    router.setParams = async (params) => {
-      if (params && params.amount) {
-        // Update balance and total spent
-        setBalance((prevBalance) => {
-          const newBalance = prevBalance - params.amount
-          
-          // Save updated balance to Firestore
-          if (auth.currentUser) {
-            updateDoc(doc(db, "users", auth.currentUser.uid), {
-              currentBalance: newBalance,
-            }).catch((error) => {
-              console.error("Failed to update balance in Firestore:", error)
-            })
-          }
-          
-          return newBalance
+      // Fetch expenses from Firestore subcollection
+      const expensesRef = collection(db, "users", auth.currentUser.uid, "expenses")
+      const expensesQuery = query(expensesRef, orderBy("date", "desc"))
+      const expensesSnapshot = await getDocs(expensesQuery)
+      
+      const expensesList = []
+      expensesSnapshot.forEach((doc) => {
+        const data = doc.data()
+        expensesList.push({
+          id: doc.id,
+          title: data.description || data.category,
+          category: data.category,
+          amount: data.amount,
+          date: data.date,
+          icon: getCategoryIcon(data.category),
         })
-        setTotalSpent((prevSpent) => prevSpent + params.amount)
-
-        // Add new transaction
-        const newTransaction = {
-          id: Date.now().toString(),
-          title: params.description || params.category,
-          category: params.category,
-          amount: params.amount,
-          date: params.date,
-          icon: getCategoryIcon(params.category),
-        }
-
-        setTransactions((prev) => [newTransaction, ...prev])
-      }
+      })
+      
+      setTransactions(expensesList)
+    } catch (error) {
+      console.error("Failed to fetch user data and expenses:", error)
     }
   }, [])
+
+  // Load data on mount and when screen comes into focus
+  useEffect(() => {
+    fetchUserDataAndExpenses()
+  }, [fetchUserDataAndExpenses])
+
+  // Reload data when screen comes into focus (e.g., when navigating back from modal)
+  useFocusEffect(
+    useCallback(() => {
+      fetchUserDataAndExpenses()
+    }, [fetchUserDataAndExpenses])
+  )
+
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
@@ -218,7 +217,7 @@ export default function Index() {
           </Pressable>
         </View>
 
-        {/* Bottom Navigation */}
+        {/* Bottom Navigation (mock) */}
         <View style={styles.tabBar}>
           <View style={styles.tabItem}>
             <Ionicons name="home" size={22} color="#1f6bff" />

@@ -1,7 +1,7 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React from 'react';
 import { Image, Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 
 export default function Start() {
   return (
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     width: 375,
     height: 375,
     marginVertical: 0,
-    marginLeft: 14,
+    marginLeft: 8,
   },
   enterButton: {
     borderRadius: 28,

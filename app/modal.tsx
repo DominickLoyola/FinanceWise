@@ -1,8 +1,10 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
+import { addDoc, collection, doc, getDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import React, { useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { auth, db } from './firebaseConfig';
 
 export const categories = [
   { id: 'food', icon: '🍔', label: 'Food' },
@@ -20,28 +22,75 @@ export default function Modal() {
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!amount || !selectedCategory) {
       alert('Please fill in amount and select a category');
       return;
     }
 
-    // Create the expense object
-    const expense = {
-      amount: parseFloat(amount),
-      category: categories.find(c => c.id === selectedCategory)?.label || '',
-      description,
-      date: date.toISOString()
-    };
+    if (!auth.currentUser) {
+      alert('You must be logged in to add expenses');
+      return;
+    }
 
-    // Navigate back with the expense data
-    router.back();
-    router.setParams(expense);
+    try {
+      const expenseAmount = parseFloat(amount);
+      const expenseCategory = categories.find(c => c.id === selectedCategory)?.label || '';
+      
+      // Get current user data
+      const userDocRef = doc(db, "users", auth.currentUser.uid);
+      const userDoc = await getDoc(userDocRef);
+      
+      if (!userDoc.exists()) {
+        alert('User data not found');
+        return;
+      }
+
+      const userData = userDoc.data();
+      const currentBalance = userData.currentBalance || 0;
+      const currentTotalSpent = userData.totalSpent || 0;
+
+      // Calculate new values
+      const newBalance = currentBalance - expenseAmount;
+      const newTotalSpent = currentTotalSpent + expenseAmount;
+
+      // Create the expense object
+      const expense = {
+        amount: expenseAmount,
+        category: expenseCategory,
+        description: description || expenseCategory,
+        date: date.toISOString(),
+        createdAt: serverTimestamp(),
+      };
+
+      // Save expense to Firestore subcollection
+      await addDoc(collection(db, "users", auth.currentUser.uid, "expenses"), expense);
+
+      // Update user balance and totalSpent in Firestore
+      await updateDoc(userDocRef, {
+        currentBalance: newBalance,
+        totalSpent: newTotalSpent,
+      });
+
+      // Navigate back
+      router.back();
+    } catch (error) {
+      console.error("Error saving expense:", error);
+      alert('Failed to save expense. Please try again.');
+    }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
+        {/* Back Button Header */}
+        <Pressable 
+          style={styles.backButton}
+          onPress={() => router.push('/')}
+        >
+          <Text style={styles.backButtonText}>Swipe down to go Home</Text>
+        </Pressable>
+        
         <Text style={styles.title}>FinanceWise</Text>
         
         <ScrollView style={styles.form}>
@@ -135,8 +184,19 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
   },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    paddingVertical: 8,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: '#1f6bff',
+    fontWeight: '600',
+  },
   title: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
     marginBottom: 24,
     textAlign: 'center',

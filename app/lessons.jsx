@@ -294,7 +294,7 @@ Points:
                         ]}
                         onPress={() => handleQuizAnswer(quizAnswered.length, index)}
                       >
-                        <Text style={styles.optionText}>{option}</Text>
+                        <Text style={styles.optionText} numberOfLines={3}>{option}</Text>
                       </Pressable>
                     ))}
                   </View>
@@ -334,12 +334,12 @@ Points:
 
           <ScrollView contentContainerStyle={styles.lessonContent} showsVerticalScrollIndicator={false}>
             <LinearGradient
-              colors={["#3960E3", "#843CE1"]}
+              colors={["#7DCD8A", "#57B6A0"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.lessonHeader}
             >
-              <FontAwesome5 name={lesson.icon} size={48} color="#fff" />
+              <FontAwesome5 name={lesson.icon} size={48} color="#ffffffff" />
               <Text style={styles.lessonTitle}>{lesson.title}</Text>
             </LinearGradient>
 
@@ -379,20 +379,22 @@ Points:
           {lessons.map((lesson, index) => (
             <Pressable key={lesson.id} style={styles.lessonCard} onPress={() => handleLessonSelect(index)}>
               <LinearGradient
-                colors={["#6F8DF1", "#9F72DB"]}
+                colors={["#7DCD8A", "#57B6A0"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.cardIcon}
               >
-                <FontAwesome5 name={lesson.icon} size={24} color="#fff" />
+                <FontAwesome5 name={lesson.icon} size={44} color="#fff" />
               </LinearGradient>
 
               <View style={styles.cardContent}>
-                <Text style={styles.cardTitle}>{lesson.title}</Text>
-                <Text style={styles.cardDescription}>{lesson.description}</Text>
+                <Text style={styles.cardTitle} numberOfLines={2}>{lesson.title}</Text>
+                <Text style={styles.cardDescription} numberOfLines={2}>{lesson.description}</Text>
               </View>
 
-              <Ionicons name="chevron-forward" size={20} color="#999" />
+              <View style={styles.arrowContainer}>
+                <Ionicons name="chevron-forward" size={20} color="#999" />
+              </View>
             </Pressable>
           ))}
         </ScrollView>
@@ -444,44 +446,53 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     textAlign: "center",
-    fontSize: 14,
+    fontSize: 18,
     color: "#999",
     marginBottom: 20,
   },
   scrollContent: {
     paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingBottom: 75,
     paddingTop: 12,
   },
   lessonCard: {
     backgroundColor: "#fff",
-    borderRadius: 12,
-    marginBottom: 12,
+    borderRadius: 16,
+    marginBottom: 16,
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "stretch",
     borderWidth: 1,
     borderColor: "#e9ecf5",
     overflow: "hidden",
+    minHeight: 80,
   },
   cardIcon: {
-    width: 60,
-    height: 60,
+    width: 80,
     alignItems: "center",
     justifyContent: "center",
+    borderTopLeftRadius: 16,
+    borderBottomLeftRadius: 16,
   },
   cardContent: {
     flex: 1,
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  arrowContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    paddingRight: 16,
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: "700",
     color: "#111",
     marginBottom: 4,
   },
   cardDescription: {
-    fontSize: 12,
+    fontSize: 15,
     color: "#999",
+    lineHeight: 20,
   },
   header: {
     flexDirection: "row",
@@ -520,39 +531,40 @@ const styles = StyleSheet.create({
   },
   contentCard: {
     backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
     borderWidth: 1,
     borderColor: "#e9ecf5",
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: "700",
     color: "#111",
-    marginBottom: 12,
+    marginBottom: 16,
   },
   lessonText: {
-    fontSize: 14,
+    fontSize: 17,
     color: "#555",
-    lineHeight: 22,
+    lineHeight: 26,
   },
   qaItem: {
-    marginBottom: 16,
-    paddingBottom: 16,
+    marginBottom: 20,
+    paddingBottom: 20,
     borderBottomWidth: 1,
     borderBottomColor: "#e9ecf5",
   },
   qaQuestion: {
-    fontSize: 13,
+    fontSize: 17,
     fontWeight: "700",
     color: "#111",
-    marginBottom: 6,
+    marginBottom: 10,
+    lineHeight: 24,
   },
   qaAnswer: {
-    fontSize: 13,
+    fontSize: 16,
     color: "#666",
-    lineHeight: 20,
+    lineHeight: 24,
   },
   quizButton: {
     backgroundColor: "#1f6bff",
@@ -593,11 +605,11 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   quizQuestion: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: "700",
     color: "#111",
-    marginBottom: 20,
-    lineHeight: 26,
+    marginBottom: 24,
+    lineHeight: 30,
   },
   optionsContainer: {
     marginBottom: 24,
@@ -605,19 +617,21 @@ const styles = StyleSheet.create({
   optionButton: {
     borderWidth: 2,
     borderColor: "#e9ecf5",
-    borderRadius: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 14,
-    marginBottom: 10,
+    borderRadius: 16,
+    paddingVertical: 18,
+    paddingHorizontal: 18,
+    marginBottom: 12,
+    minHeight: 60,
   },
   optionButtonSelected: {
     borderColor: "#1f6bff",
     backgroundColor: "#f0f6ff",
   },
   optionText: {
-    fontSize: 14,
+    fontSize: 17,
     fontWeight: "600",
     color: "#111",
+    lineHeight: 24,
   },
   nextButton: {
     backgroundColor: "#1f6bff",

@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
-import { doc, getDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, orderBy, query } from 'firebase/firestore';
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -44,17 +44,17 @@ export default function Balance() {
   const params = useLocalSearchParams();
   const [balance, setBalance] = React.useState(0);
   const [annualIncome, setAnnualIncome] = React.useState(0);
-  const transactions = React.useMemo(() => {
-    try { return JSON.parse(params.tx || '[]'); } catch { return []; }
-  }, [params.tx]);
-  const spent = parseFloat(params.spent || '0');
+  const [transactions, setTransactions] = React.useState([]);
+  const [spent, setSpent] = React.useState(0);
 
-  // Fetch balance and income from Firestore (same source as home.jsx)
+  // Fetch balance, income, and expenses from Firestore
   React.useEffect(() => {
-    async function fetchUserData() {
+    async function fetchUserDataAndExpenses() {
       if (!auth.currentUser) return;
       try {
-        const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
+        const userDocRef = doc(db, "users", auth.currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        
         if (userDoc.exists()) {
           const userData = userDoc.data();
           if (userData.currentBalance !== undefined && userData.currentBalance !== null) {
@@ -63,18 +63,51 @@ export default function Balance() {
           if (userData.annualIncome !== undefined && userData.annualIncome !== null) {
             setAnnualIncome(userData.annualIncome);
           }
+          if (userData.totalSpent !== undefined && userData.totalSpent !== null) {
+            setSpent(userData.totalSpent);
+          }
         }
+
+        // Fetch expenses from Firestore subcollection
+        const expensesRef = collection(db, "users", auth.currentUser.uid, "expenses");
+        const expensesQuery = query(expensesRef, orderBy("date", "desc"));
+        const expensesSnapshot = await getDocs(expensesQuery);
+        
+        const expensesList = [];
+        expensesSnapshot.forEach((doc) => {
+          const data = doc.data();
+          expensesList.push({
+            id: doc.id,
+            category: data.category,
+            amount: data.amount,
+            date: data.date,
+          });
+        });
+        
+        setTransactions(expensesList);
       } catch (error) {
-        console.error("Failed to fetch user data:", error);
+        console.error("Failed to fetch user data and expenses:", error);
         // Fallback to params if Firestore fails
+        try {
+          const paramTransactions = JSON.parse(params.tx || '[]');
+          if (paramTransactions.length > 0) {
+            setTransactions(paramTransactions);
+          }
+        } catch (e) {
+          // Ignore parse errors
+        }
         const paramBalance = parseFloat(params.balance || '0');
+        const paramSpent = parseFloat(params.spent || '0');
         if (paramBalance > 0) {
           setBalance(paramBalance);
         }
+        if (paramSpent > 0) {
+          setSpent(paramSpent);
+        }
       }
     }
-    fetchUserData();
-  }, [params.balance]);
+    fetchUserDataAndExpenses();
+  }, [params.balance, params.tx, params.spent]);
 
   const categoryTotals = React.useMemo(() => {
     const totals = {};
@@ -176,14 +209,14 @@ export default function Balance() {
 
       {/* Bottom Navigation (same visual as home) */}
       <View style={styles.tabBar}>
-        <Pressable style={styles.tabItem} onPress={() => router.push("/home")}>
-          <Ionicons name="home" size={22} color="#777" />
-          <Text style={styles.tabLabel}>Home</Text>
-        </Pressable>
-        <Pressable style={styles.tabItem} onPress={() => router.push("/lessons")}>
+        <View style={styles.tabItem}>
+          <Ionicons name="home" size={22} color="#1f6bff" />
+          <Text style={[styles.tabLabel, styles.tabLabelActive]}>Home</Text>
+        </View>
+        <View style={styles.tabItem}>
           <Ionicons name="book" size={22} color="#777" />
           <Text style={styles.tabLabel}>Learn</Text>
-        </Pressable>
+        </View>
         <View style={styles.tabItem}>
           <Ionicons name="sparkles" size={22} color="#777" />
           <Text style={styles.tabLabel}>AI Advisor</Text>
@@ -192,10 +225,10 @@ export default function Balance() {
           <Ionicons name="flag" size={22} color="#777" />
           <Text style={styles.tabLabel}>Goals</Text>
         </View>
-        <Pressable style={styles.tabItem} onPress={() => router.push("/profile")}>
+        <View style={styles.tabItem}>
           <Ionicons name="person" size={22} color="#777" />
           <Text style={styles.tabLabel}>Profile</Text>
-        </Pressable>
+        </View>
       </View>
     </SafeAreaView>
   );
