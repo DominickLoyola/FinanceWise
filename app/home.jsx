@@ -150,7 +150,7 @@ export default function Index() {
             <Text style={styles.welcomeTitle}>Welcome, {userName || "User"}! 👋</Text>
             <View style={styles.progressContainer}>
               <Text style={styles.progressLabel}>Progress this week</Text>
-              <Text style={styles.progressValue}>75%</Text>
+              <Text style={styles.progressValue}>0%</Text>
             </View>
             <View style={styles.progressBarBg}>
               <View style={styles.progressBarFill} />
@@ -158,6 +158,21 @@ export default function Index() {
           </LinearGradient>
 
           {/* Balance Card */}
+          <LinearGradient
+            colors={["#6F8DF1", "#9F72DB"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.card, styles.cardSecondary]}
+          >
+            <Text style={styles.balanceLabel}>Current Balance</Text>
+            <Text style={styles.balanceValue}>${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
+            <View style={styles.balanceRow}>
+              <Text style={styles.balanceMeta}>Income: ${annualIncome.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
+              <Text style={styles.balanceMeta}>Spent: ${totalSpent.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
+            </View>
+          </LinearGradient>
+
+          {/* Budget Chart Placeholder */}
           <Pressable
             onPress={() =>
               router.push({
@@ -167,25 +182,15 @@ export default function Index() {
             }
           >
             <LinearGradient
-              colors={["#6F8DF1", "#9F72DB"]}
+              colors={["#06dbcdff", "#279bdaff"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              style={[styles.card, styles.cardSecondary]}
+              style={[styles.card, styles.chartCard]}
             >
-              <Text style={styles.balanceLabel}>Current Balance</Text>
-              <Text style={styles.balanceValue}>${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
-              <View style={styles.balanceRow}>
-                <Text style={styles.balanceMeta}>Income: ${annualIncome.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
-                <Text style={styles.balanceMeta}>Spent: ${totalSpent.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
-              </View>
+              <MaterialIcons name="bar-chart" size={36} color="#fff" />
+              <Text style={styles.chartTitle}>Budget Balance Chart</Text>
             </LinearGradient>
           </Pressable>
-
-          {/* Budget Chart Placeholder */}
-          <View style={styles.chartCard}>
-            <MaterialIcons name="bar-chart" size={32} color="#111" />
-            <Text style={styles.chartTitle}>Budget Balance Chart</Text>
-          </View>
 
           {/* Recent Transactions */}
           <Text style={styles.sectionHeader}>Recent Transactions</Text>
@@ -302,7 +307,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   progressBarFill: {
-    width: "75%",
+    width: "0%",
     height: "100%",
     backgroundColor: "#fff",
     borderRadius: 6,
@@ -328,17 +333,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   chartCard: {
-    borderRadius: 16,
-    padding: 20,
     alignItems: "center",
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "#e9ecf5",
+    justifyContent: "center",
+    minHeight: 100,
   },
   chartTitle: {
     marginTop: 8,
     fontWeight: "700",
-    color: "#111",
+    color: "#fff",
+    fontSize: 18,
   },
   sectionHeader: {
     fontSize: 18,
