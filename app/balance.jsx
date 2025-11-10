@@ -123,6 +123,12 @@ export default function Balance() {
 
   const totalAmount = Object.values(categoryTotals).reduce((a, b) => a + b, 0) || 1;
 
+  // Calculate percentage for a category
+  const getCategoryPercentage = (amount) => {
+    if (totalAmount === 0) return 0;
+    return Math.round((amount / totalAmount) * 100);
+  };
+
   // Build arcs
   const size = 260; const r = 110; const strokeW = 36; const cx = size / 2; const cy = size / 2;
   let startAngle = 0;
@@ -189,34 +195,38 @@ export default function Balance() {
         {selected ? (
           <View style={styles.hintRow}>
             <View style={[styles.hintDot, { backgroundColor: getCategoryColor(selected) }]} />
-            <Text style={styles.hintText}>{`${selected} $${categoryTotals[selected].toFixed(2)}`}</Text>
+            <Text style={styles.hintText}>{`${selected} $${categoryTotals[selected].toFixed(2)} (${getCategoryPercentage(categoryTotals[selected])}%)`}</Text>
           </View>
         ) : (
           <Text style={styles.hint}>Tap to see details</Text>
         )}
 
         <View style={styles.legend}>
-          {modalCategories.map((c) => (
-            <View key={c.id} style={styles.legendRow}>
-              <View style={[styles.legendDot, { backgroundColor: getCategoryColor(c.label) }]} />
-              <Text style={styles.legendLabel}>{c.label}</Text>
-              <Text style={styles.legendValue}>${(categoryTotals[c.label] || 0).toFixed(2)}</Text>
-            </View>
-          ))}
+          {modalCategories.map((c) => {
+            const amount = categoryTotals[c.label] || 0;
+            const percentage = getCategoryPercentage(amount);
+            return (
+              <View key={c.id} style={styles.legendRow}>
+                <View style={[styles.legendDot, { backgroundColor: getCategoryColor(c.label) }]} />
+                <Text style={styles.legendLabel}>{c.label}</Text>
+                <Text style={styles.legendValue}>${amount.toFixed(2)} ({percentage}%)</Text>
+              </View>
+            );
+          })}
         </View>
         <View style={{ height: 80 }} />
       </ScrollView>
 
       {/* Bottom Navigation (same visual as home) */}
       <View style={styles.tabBar}>
-        <View style={styles.tabItem}>
-          <Ionicons name="home" size={22} color="#1f6bff" />
-          <Text style={[styles.tabLabel, styles.tabLabelActive]}>Home</Text>
-        </View>
-        <View style={styles.tabItem}>
+        <Pressable style={styles.tabItem} onPress={() => router.push("/home")}>
+          <Ionicons name="home" size={22} color="#777" />
+          <Text style={styles.tabLabel}>Home</Text>
+        </Pressable>
+        <Pressable style={styles.tabItem} onPress={() => router.push("/lessons")}>
           <Ionicons name="book" size={22} color="#777" />
           <Text style={styles.tabLabel}>Learn</Text>
-        </View>
+        </Pressable>
         <View style={styles.tabItem}>
           <Ionicons name="sparkles" size={22} color="#777" />
           <Text style={styles.tabLabel}>AI Advisor</Text>
@@ -225,10 +235,10 @@ export default function Balance() {
           <Ionicons name="flag" size={22} color="#777" />
           <Text style={styles.tabLabel}>Goals</Text>
         </View>
-        <View style={styles.tabItem}>
+        <Pressable style={styles.tabItem} onPress={() => router.push("/profile")}>
           <Ionicons name="person" size={22} color="#777" />
           <Text style={styles.tabLabel}>Profile</Text>
-        </View>
+        </Pressable>
       </View>
     </SafeAreaView>
   );
