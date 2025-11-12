@@ -95,6 +95,7 @@ export default function Modal() {
           <TextInput
             style={styles.input}
             placeholder="$20.00"
+            placeholderTextColor="#666"
             value={amount}
             onChangeText={setAmount}
             keyboardType="decimal-pad"
@@ -121,6 +122,7 @@ export default function Modal() {
           <TextInput
             style={styles.input}
             placeholder="What did you spend on?"
+            placeholderTextColor="#666"
             value={description}
             onChangeText={setDescription}
           />

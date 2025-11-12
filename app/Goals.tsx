@@ -85,12 +85,14 @@ export default function GoalsPage() {
       <TextInput
         value={title}
         placeholder="Goal Name"
+        placeholderTextColor="#666"
         onChangeText={setTitle}
         style={styles.input}
       />
       <TextInput
         value={current}
         placeholder="Current Amount"
+        placeholderTextColor="#666"
         keyboardType="numeric"
         onChangeText={setCurrent}
         style={styles.input}
@@ -98,6 +100,7 @@ export default function GoalsPage() {
       <TextInput
         value={target}
         placeholder="Target Amount"
+        placeholderTextColor="#666"
         keyboardType="numeric"
         onChangeText={setTarget}
         style={styles.input}
