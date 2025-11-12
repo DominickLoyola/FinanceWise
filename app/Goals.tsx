@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { router } from 'expo-router'; // Add this import
+import React, { useState } from 'react';
+import { Button, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 type Goal = {
   id: string;
@@ -109,7 +109,7 @@ export default function GoalsPage() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: '#fff' },
-  backButton: { marginBottom: 8, alignSelf: 'flex-start', paddingVertical: 4, paddingHorizontal: 8 },
+  backButton: { marginTop: 50, marginBottom: 8, alignSelf: 'flex-start', paddingVertical: 4, paddingHorizontal: 8 },
   backButtonText: { color: '#2563eb', fontSize: 16, fontWeight: '600' },
   header: { fontSize: 24, fontWeight: '600', textAlign: 'center', marginVertical: 16 },
   card: {
