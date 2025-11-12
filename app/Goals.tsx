@@ -81,7 +81,6 @@ export default function GoalsPage() {
           );
         }}
       />
-      <Text style={styles.formHeader}>+ Add New Goal</Text>
       <TextInput
         value={title}
         placeholder="Goal Name"
@@ -105,7 +104,7 @@ export default function GoalsPage() {
         onChangeText={setTarget}
         style={styles.input}
       />
-      <Button title="Add Goal" onPress={addGoal} />
+      <Button title="+Add Goal" onPress={addGoal} />
     </View>
   );
 }
