@@ -1,109 +1,85 @@
-import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons"
-import { LinearGradient } from "expo-linear-gradient"
-import { router, useFocusEffect } from "expo-router"
-import { collection, doc, getDoc, getDocs, orderBy, query } from "firebase/firestore"
-import React, { useCallback, useEffect, useState } from "react"
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native"
-import { SafeAreaView } from "react-native-safe-area-context"
-import { auth, db } from "./firebaseConfig"
+import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { router, useFocusEffect } from "expo-router";
+import { collection, doc, getDoc, getDocs, orderBy, query } from "firebase/firestore";
+import React, { useCallback, useEffect, useState } from "react";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { auth, db } from "./firebaseConfig";
 
 // Helper function to get icon based on category
 const getCategoryIcon = (category) => {
   switch (category.toLowerCase()) {
-    case "food":
-      return "hamburger"
-    case "transport":
-      return "car"
-    case "housing":
-      return "home"
-    case "entertainment":
-      return "gamepad"
-    case "shopping":
-      return "shopping-bag"
-    case "health":
-      return "medkit"
-    default:
-      return "receipt"
+    case "food": return "hamburger";
+    case "transport": return "car";
+    case "housing": return "home";
+    case "entertainment": return "gamepad";
+    case "shopping": return "shopping-bag";
+    case "health": return "medkit";
+    default: return "receipt";
   }
-}
+};
 
 // Helper function to get color based on category
 const getCategoryColor = (category) => {
   switch (category.toLowerCase()) {
-    case "food":
-      return "#49e4a8ff" // Green for food
-    case "transport":
-      return "#3c89fdff" // Blue for transport
-    case "housing":
-      return "#ff3c3cff" // Red for housing
-    case "entertainment":
-      return "#6d34f3ff" // Purple for entertainment
-    case "shopping":
-      return "#fada71ff" // Yellow for shopping
-    case "health":
-      return "#f889f8ff" // Pink for health
-    default:
-      return "#c48220ff" // Default Brown
+    case "food": return "#49e4a8ff"; // Green for food
+    case "transport": return "#3c89fdff"; // Blue for transport
+    case "housing": return "#ff3c3cff"; // Red for housing
+    case "entertainment": return "#6d34f3ff"; // Purple for entertainment
+    case "shopping": return "#fada71ff"; // Yellow for shopping
+    case "health": return "#f889f8ff"; // Pink for health
+    default: return "#c48220ff"; // Default Brown
   }
-}
+};
 
 // Helper function to format the date
 const formatDate = (dateString) => {
-  const date = new Date(dateString)
-  const today = new Date()
-  const yesterday = new Date(today)
-  yesterday.setDate(yesterday.getDate() - 1)
+  const date = new Date(dateString);
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
 
   if (date.toDateString() === today.toDateString()) {
-    return "Today"
+    return "Today";
   }
   if (date.toDateString() === yesterday.toDateString()) {
-    return "Yesterday"
+    return "Yesterday";
   }
   return date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
-  })
-}
+  });
+};
 
 export default function Index() {
-  const [balance, setBalance] = useState(0)
-  const [totalSpent, setTotalSpent] = useState(0)
-  const [transactions, setTransactions] = useState([])
-  const [userName, setUserName] = useState("")
-  const [annualIncome, setAnnualIncome] = useState(0)
+  const [balance, setBalance] = useState(0);
+  const [totalSpent, setTotalSpent] = useState(0);
+  const [transactions, setTransactions] = useState([]);
+  const [userName, setUserName] = useState("");
+  const [annualIncome, setAnnualIncome] = useState(0);
 
-  // Fetch user data and expenses from Firestore
   const fetchUserDataAndExpenses = useCallback(async () => {
-    if (!auth.currentUser) return
+    if (!auth.currentUser) return;
     try {
-      const userDocRef = doc(db, "users", auth.currentUser.uid)
-      const userDoc = await getDoc(userDocRef)
-      
+      const userDocRef = doc(db, "users", auth.currentUser.uid);
+      const userDoc = await getDoc(userDocRef);
+
       if (userDoc.exists()) {
-        const userData = userDoc.data()
-        if (userData.currentBalance !== undefined && userData.currentBalance !== null) {
-          setBalance(userData.currentBalance)
-        }
-        if (userData.name) {
-          setUserName(userData.name)
-        }
-        if (userData.annualIncome !== undefined && userData.annualIncome !== null) {
-          setAnnualIncome(userData.annualIncome)
-        }
-        if (userData.totalSpent !== undefined && userData.totalSpent !== null) {
-          setTotalSpent(userData.totalSpent)
-        }
+        const userData = userDoc.data();
+        if (userData.currentBalance !== undefined && userData.currentBalance !== null) setBalance(userData.currentBalance);
+        if (userData.name) setUserName(userData.name);
+        if (userData.annualIncome !== undefined && userData.annualIncome !== null) setAnnualIncome(userData.annualIncome);
+        if (userData.totalSpent !== undefined && userData.totalSpent !== null) setTotalSpent(userData.totalSpent);
       }
 
-      // Fetch expenses from Firestore subcollection
-      const expensesRef = collection(db, "users", auth.currentUser.uid, "expenses")
-      const expensesQuery = query(expensesRef, orderBy("date", "desc"))
-      const expensesSnapshot = await getDocs(expensesQuery)
-      
-      const expensesList = []
+      const expensesRef = collection(db, "users", auth.currentUser.uid, "expenses");
+      const expensesQuery = query(expensesRef, orderBy("date", "desc"));
+      const expensesSnapshot = await getDocs(expensesQuery);
+
+      const expensesList = [];
       expensesSnapshot.forEach((doc) => {
-        const data = doc.data()
+        const data = doc.data();
         expensesList.push({
           id: doc.id,
           title: data.description || data.category,
@@ -111,36 +87,31 @@ export default function Index() {
           amount: data.amount,
           date: data.date,
           icon: getCategoryIcon(data.category),
-        })
-      })
-      
-      setTransactions(expensesList)
+        });
+      });
+
+      setTransactions(expensesList);
     } catch (error) {
-      console.error("Failed to fetch user data and expenses:", error)
+      console.error("Failed to fetch user data and expenses:", error);
     }
-  }, [])
+  }, []);
 
-  // Load data on mount and when screen comes into focus
   useEffect(() => {
-    fetchUserDataAndExpenses()
-  }, [fetchUserDataAndExpenses])
+    fetchUserDataAndExpenses();
+  }, [fetchUserDataAndExpenses]);
 
-  // Reload data when screen comes into focus (e.g., when navigating back from modal)
   useFocusEffect(
     useCallback(() => {
-      fetchUserDataAndExpenses()
+      fetchUserDataAndExpenses();
     }, [fetchUserDataAndExpenses])
-  )
-
+  );
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <View style={styles.container}>
-        {/* App Title */}
         <Text style={styles.title}>FinanceWise</Text>
 
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          {/* Welcome Card */}
           <LinearGradient
             colors={["#3960E3", "#843CE1"]}
             start={{ x: 0, y: 0 }}
@@ -157,7 +128,6 @@ export default function Index() {
             </View>
           </LinearGradient>
 
-          {/* Balance Card */}
           <LinearGradient
             colors={["#6F8DF1", "#9F72DB"]}
             start={{ x: 0, y: 0 }}
@@ -165,14 +135,19 @@ export default function Index() {
             style={[styles.card, styles.cardSecondary]}
           >
             <Text style={styles.balanceLabel}>Current Balance</Text>
-            <Text style={styles.balanceValue}>${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
+            <Text style={styles.balanceValue}>
+              ${balance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </Text>
             <View style={styles.balanceRow}>
-              <Text style={styles.balanceMeta}>Income: ${annualIncome.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
-              <Text style={styles.balanceMeta}>Spent: ${totalSpent.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
+              <Text style={styles.balanceMeta}>
+                Income: ${annualIncome.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </Text>
+              <Text style={styles.balanceMeta}>
+                Spent: ${totalSpent.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </Text>
             </View>
           </LinearGradient>
 
-          {/* Budget Chart Placeholder */}
           <Pressable
             onPress={() =>
               router.push({
@@ -192,7 +167,6 @@ export default function Index() {
             </LinearGradient>
           </Pressable>
 
-          {/* Recent Transactions */}
           <Text style={styles.sectionHeader}>Recent Transactions</Text>
 
           <View style={styles.recentContainer}>
@@ -200,7 +174,11 @@ export default function Index() {
               {transactions.map((transaction) => (
                 <View key={transaction.id} style={styles.transactionCard}>
                   <View style={styles.transactionLeft}>
-                    <FontAwesome5 name={transaction.icon} size={18} color={getCategoryColor(transaction.category)} />
+                    <FontAwesome5
+                      name={transaction.icon}
+                      size={18}
+                      color={getCategoryColor(transaction.category)}
+                    />
                     <View style={styles.transactionTextWrap}>
                       <Text style={styles.transactionTitle}>{transaction.title}</Text>
                       <Text style={styles.transactionSubtitle}>
@@ -215,14 +193,12 @@ export default function Index() {
           </View>
         </ScrollView>
 
-        {/* Fixed Add button (always visible) */}
         <View style={styles.fixedFooter}>
           <Pressable style={styles.primaryButton} onPress={() => router.push("/modal")}>
             <Text style={styles.primaryButtonText}>+ Add Expense</Text>
           </Pressable>
         </View>
 
-        {/* Bottom Navigation (mock) */}
         <View style={styles.tabBar}>
           <View style={styles.tabItem}>
             <Ionicons name="home" size={22} color="#1f6bff" />
@@ -236,19 +212,20 @@ export default function Index() {
             <Ionicons name="sparkles" size={22} color="#777" />
             <Text style={styles.tabLabel}>AI Advisor</Text>
           </View>
-          <View style={styles.tabItem}>
+          <Pressable style={styles.tabItem} onPress={() => router.push("/Goals")}>
             <Ionicons name="flag" size={22} color="#777" />
             <Text style={styles.tabLabel}>Goals</Text>
-          </View>
+          </Pressable>
           <Pressable style={styles.tabItem} onPress={() => router.push("/profile")}>
             <Ionicons name="person" size={22} color="#777" />
             <Text style={styles.tabLabel}>Profile</Text>
           </Pressable>
         </View>
+
         <View style={styles.bottomSpacer} />
       </View>
     </SafeAreaView>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -426,4 +403,4 @@ const styles = StyleSheet.create({
     height: 0,
     backgroundColor: "transparent",
   },
-})
+});

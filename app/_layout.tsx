@@ -29,6 +29,7 @@ function RootLayoutNav() {
       <Stack.Screen name="balance" options={{ headerShown: false }} />
       <Stack.Screen name="lessons" options={{ headerShown: false }} />
       <Stack.Screen name="profile" options={{ headerShown: false }} />
+      <Stack.Screen name="Goals" options={{ headerShown: false }} /> {/* New line */}
       <Stack.Screen name="modal" options={{ presentation: "modal", headerShown: false }} />
     </Stack>
   )
@@ -37,24 +38,7 @@ function RootLayoutNav() {
 export default function Layout() {
   return (
     <AuthProvider>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-        }}
-      >
-        <Stack.Screen name="index" />
-        <Stack.Screen name="auth" />
-        <Stack.Screen name="home" />
-        <Stack.Screen name="balance" />
-        <Stack.Screen name="lessons" />
-        <Stack.Screen 
-          name="modal" 
-          options={{ 
-            presentation: "modal",
-            headerShown: false 
-          }} 
-        />
-      </Stack>
+      <RootLayoutNav />
     </AuthProvider>
   )
 }
