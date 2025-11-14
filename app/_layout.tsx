@@ -14,6 +14,7 @@ export default function RootLayout() {
         <Stack.Screen name="home" />
         <Stack.Screen name="balance" />
         <Stack.Screen name="lessons" />
+        <Stack.Screen name="ai" />
         <Stack.Screen 
           name="modal" 
           options={{ 

@@ -169,6 +169,13 @@ export default function Auth() {
             <Text style={styles.tagline}>Manage Your Money Wisely</Text>
           </View>
 
+          {/* Temporary bypass while auth is incomplete */}
+          <View style={{ alignItems: "center", marginBottom: 12 }}>
+            <Pressable onPress={() => router.replace("/home")}>
+              <Text style={{ color: "#3960E3", fontWeight: "700" }}>Skip for now</Text>
+            </Pressable>
+          </View>
+
           <View style={styles.formContainer}>
             {mode === "signin" ? (
               <>
