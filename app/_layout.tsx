@@ -29,6 +29,7 @@ function RootLayoutNav() {
       <Stack.Screen name="balance" options={{ headerShown: false }} />
       <Stack.Screen name="lessons" options={{ headerShown: false }} />
       <Stack.Screen name="profile" options={{ headerShown: false }} />
+      <Stack.Screen name="Goals" options={{ headerShown: false }} /> {/* New line */}
       <Stack.Screen name="modal" options={{ presentation: "modal", headerShown: false }} />
     </Stack>
   )

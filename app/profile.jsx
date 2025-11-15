@@ -140,10 +140,10 @@ export default function Profile() {
             <Ionicons name="sparkles" size={22} color="#777" />
             <Text style={styles.tabLabel}>AI Advisor</Text>
           </View>
-          <View style={styles.tabItem}>
+          <Pressable style={styles.tabItem} onPress={() => router.push("/Goals")}>
             <Ionicons name="flag" size={22} color="#777" />
             <Text style={styles.tabLabel}>Goals</Text>
-          </View>
+          </Pressable>
           <View style={styles.tabItem}>
             <Ionicons name="person" size={22} color="#1f6bff" />
             <Text style={[styles.tabLabel, styles.tabLabelActive]}>Profile</Text>

@@ -416,7 +416,7 @@ Points:
           <View style={styles.tabItem}>
             <Ionicons name="flag" size={22} color="#777" />
             <Text style={styles.tabLabel}>Goals</Text>
-          </View>
+          </Pressable>
           <Pressable style={styles.tabItem} onPress={() => router.push("/profile")}>
             <Ionicons name="person" size={22} color="#777" />
             <Text style={styles.tabLabel}>Profile</Text>
