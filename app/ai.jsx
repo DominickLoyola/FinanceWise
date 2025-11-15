@@ -1,11 +1,11 @@
+import React, { useEffect, useState } from "react"
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, ActivityIndicator, Linking } from "react-native"
+import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { router } from "expo-router"
-import { addDoc, collection, deleteDoc, doc, getDoc, onSnapshot, orderBy, query, updateDoc } from "firebase/firestore"
-import React, { useEffect, useState } from "react"
-import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native"
-import { SafeAreaView } from "react-native-safe-area-context"
-import { generateAdvice } from "../advisors/localAdvisor"
 import { auth, db } from "./firebaseConfig"
+import { doc, getDoc, collection, addDoc, updateDoc, deleteDoc, onSnapshot, orderBy, query } from "firebase/firestore"
+import { generateAdvice } from "../advisors/localAdvisor"
 
 export default function AIAdvisor() {
   const STORAGE_KEY = "wise:messages:v1"
@@ -369,14 +369,14 @@ export default function AIAdvisor() {
           <Ionicons name="sparkles" size={22} color="#1f6bff" />
           <Text style={[styles.tabLabel, styles.tabLabelActive]}>AI Advisor</Text>
         </View>
-        <Pressable style={styles.tabItem} onPress={() => router.push("/goals")}>
+        <View style={styles.tabItem}>
           <Ionicons name="flag" size={22} color="#777" />
           <Text style={styles.tabLabel}>Goals</Text>
-        </Pressable>
-        <Pressable style={styles.tabItem} onPress={() => router.push("/profile")}>
+        </View>
+        <View style={styles.tabItem}>
           <Ionicons name="person" size={22} color="#777" />
           <Text style={styles.tabLabel}>Profile</Text>
-        </Pressable>
+        </View>
       </View>
     </SafeAreaView>
   )

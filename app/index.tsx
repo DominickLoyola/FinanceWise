@@ -14,7 +14,7 @@ export default function Start() {
         />
 
         <Pressable
-          onPress={() => router.push('/auth')}
+          onPress={() => router.push('/home')}
           style={({ pressed }) => [styles.enterButton, pressed && styles.enterButtonPressed]}
         >
           <LinearGradient
