@@ -157,7 +157,7 @@ export default function Index() {
             }
           >
             <LinearGradient
-              colors={["#06dbcdff", "#279bdaff"]}
+              colors={["#03a1a3ff", "#4aeed5ff"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={[styles.card, styles.chartCard]}
