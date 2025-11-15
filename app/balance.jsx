@@ -226,11 +226,11 @@ export default function Balance() {
         <Pressable style={styles.tabItem} onPress={() => router.push("/lessons")}>
           <Ionicons name="book" size={22} color="#777" />
           <Text style={styles.tabLabel}>Learn</Text>
-        </Pressable>
-        <View style={styles.tabItem}>
+        </View>
+        <Pressable style={styles.tabItem} onPress={() => router.push('/ai')}>
           <Ionicons name="sparkles" size={22} color="#777" />
           <Text style={styles.tabLabel}>AI Advisor</Text>
-        </View>
+        </Pressable>
         <View style={styles.tabItem}>
           <Ionicons name="flag" size={22} color="#777" />
           <Text style={styles.tabLabel}>Goals</Text>
