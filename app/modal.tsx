@@ -85,7 +85,7 @@ export default function Modal() {
       <View style={styles.container}>
         {/* Back Button Header */}
         <View style={styles.backButton}>
-          <Text style={styles.backButtonText}>Swipe down to go Home</Text>
+          <Text style={styles.backButtonText}>Swipe down from here to go Home</Text>
         </View>
         
         <Text style={styles.title}>FinanceWise</Text>
