@@ -1,13 +1,13 @@
-import { Ionicons } from "@expo/vector-icons"
-import { LinearGradient } from "expo-linear-gradient"
-import { router } from "expo-router"
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile,
-} from "firebase/auth"
-import { doc, setDoc } from "firebase/firestore"
-import { useContext, useState } from "react"
+} from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { useContext, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -18,9 +18,9 @@ import {
   Text,
   TextInput,
   View,
-} from "react-native"
-import { AuthContext } from "../contexts/AuthContext"
-import { auth, db } from "./firebaseConfig"
+} from "react-native";
+import { AuthContext } from "../contexts/AuthContext";
+import { auth, db } from "./firebaseConfig";
 
 export default function Auth() {
   const { login } = useContext(AuthContext)
