@@ -1,33 +1,41 @@
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  query,
+  where,
+} from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
+  Alert,
   Button,
-  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Pressable
+  View
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import {
-  collection,
-  query,
-  where,
-  addDoc,
-  deleteDoc,
-  doc,
-  onSnapshot,
-} from "firebase/firestore";
-import { db, auth } from "./firebaseConfig";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { auth, db } from "./firebaseConfig";
+
+interface Goal {
+  id: string;
+  title: string;
+  current: number;
+  target: number;
+  docId: string;
+}
 
 export default function GoalsPage() {
-  const [goals, setGoals] = useState([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
   const [title, setTitle] = useState("");
   const [current, setCurrent] = useState("");
   const [target, setTarget] = useState("");
@@ -41,7 +49,7 @@ export default function GoalsPage() {
       where("userId", "==", currentUser.uid)
     );
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const goalsArr = [];
+      const goalsArr: Goal[] = [];
       querySnapshot.forEach((docSnap) => {
         const data = docSnap.data();
         goalsArr.push({
@@ -88,7 +96,7 @@ export default function GoalsPage() {
     }
   }
 
-  async function deleteGoal(docId) {
+  async function deleteGoal(docId: string) {
     if (!docId) return;
     try {
       await deleteDoc(doc(db, "goals", docId));
@@ -99,51 +107,52 @@ export default function GoalsPage() {
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={80}
-      >
-        {/* Use ScrollView and add extra padding bottom to allow scrolling above the tab bar */}
-        <ScrollView contentContainerStyle={{ paddingBottom: 110 }} keyboardShouldPersistTaps="handled">
-          <View style={styles.screenBg}>
-            <View style={styles.headerWrap}>
-              <Text style={styles.pageTitle}>Your Financial Goals</Text>
-              <Text style={styles.dateText}>{new Date().toLocaleDateString()}</Text>
-            </View>
-            <FlatList
-              data={goals}
-              ListEmptyComponent={<Text style={styles.emptyText}>No goals yet. Add one below!</Text>}
-              keyExtractor={(item) => item.id}
-              style={{ marginBottom: 12 }}
-              renderItem={({ item }) => {
-                const pct = Math.min(100, Math.round((item.current / item.target) * 100));
-                return (
-                  <View style={styles.goalCard}>
-                    <View style={styles.goalCardHeader}>
-                      <Text style={styles.goalCardTitle}>{item.title}</Text>
-                      <TouchableOpacity onPress={() => deleteGoal(item.docId)}>
-                        <Text style={styles.deleteBtn}>✗</Text>
-                      </TouchableOpacity>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Financial Goals</Text>
+        
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={80}
+        >
+          <ScrollView 
+            contentContainerStyle={styles.scrollContent} 
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            {goals.length === 0 ? (
+              <Text style={styles.emptyText}>No goals yet. Add one below!</Text>
+            ) : (
+              <View style={{ marginBottom: 12 }}>
+                {goals.map((item) => {
+                  const pct = Math.min(100, Math.round((item.current / item.target) * 100));
+                  return (
+                    <View key={item.id} style={styles.goalCard}>
+                      <View style={styles.goalCardHeader}>
+                        <Text style={styles.goalCardTitle}>{item.title}</Text>
+                        <TouchableOpacity onPress={() => deleteGoal(item.docId)}>
+                          <Text style={styles.deleteBtn}>✗</Text>
+                        </TouchableOpacity>
+                      </View>
+                      <Text style={styles.goalCardAmount}>${item.current} / ${item.target}</Text>
+                      <View style={styles.progressBg}>
+                        <View
+                          style={[
+                            styles.progressBar,
+                            {
+                              width: `${pct}%`,
+                              backgroundColor: pct === 100 ? "#20b86a" : "#719AFF",
+                            },
+                          ]}
+                        />
+                      </View>
+                      <Text style={styles.percentText}>{pct}% complete</Text>
                     </View>
-                    <Text style={styles.goalCardAmount}>${item.current} / ${item.target}</Text>
-                    <View style={styles.progressBg}>
-                      <View
-                        style={[
-                          styles.progressBar,
-                          {
-                            width: `${pct}%`,
-                            backgroundColor: pct === 100 ? "#20b86a" : "#719AFF",
-                          },
-                        ]}
-                      />
-                    </View>
-                    <Text style={styles.percentText}>{pct}% complete</Text>
-                  </View>
-                );
-              }}
-            />
+                  );
+                })}
+              </View>
+            )}
             <View style={styles.inputCard}>
               <Text style={styles.inputCardTitle}>Add New Goal</Text>
               <TextInput
@@ -173,12 +182,11 @@ export default function GoalsPage() {
               </View>
               <Button title={loading ? "Adding..." : "+ Add Goal"} onPress={addGoal} disabled={loading} />
             </View>
-            <View style={{ height: 24 }} />
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-      {/* Fixed bottom tab bar - stays visible, add padding to ScrollView so button scrolls above it */}
-      <View style={styles.tabBar}>
+          </ScrollView>
+        </KeyboardAvoidingView>
+
+        {/* Bottom Navigation */}
+        <View style={styles.tabBar}>
         <Pressable style={styles.tabItem} onPress={() => router.push("/home")}>  
           <Ionicons name="home" size={22} color="#777" />
           <Text style={styles.tabLabel}>Home</Text>
@@ -187,46 +195,49 @@ export default function GoalsPage() {
           <Ionicons name="book" size={22} color="#777" />
           <Text style={styles.tabLabel}>Learn</Text>
         </Pressable>
-        <View style={styles.tabItem}>
-          <Ionicons name="flag" size={22} color="#1f6bff" />
-          <Text style={[styles.tabLabel, styles.tabLabelActive]}>Goals</Text>
-        </View>
         <Pressable style={styles.tabItem} onPress={() => router.push("/ai")}>  
           <Ionicons name="sparkles" size={22} color="#777" />
           <Text style={styles.tabLabel}>AI Advisor</Text>
         </Pressable>
+        <View style={styles.tabItem}>
+          <Ionicons name="flag" size={22} color="#1f6bff" />
+          <Text style={[styles.tabLabel, styles.tabLabelActive]}>Goals</Text>
+        </View>
         <Pressable style={styles.tabItem} onPress={() => router.push("/profile")}>  
           <Ionicons name="person" size={22} color="#777" />
           <Text style={styles.tabLabel}>Profile</Text>
         </Pressable>
       </View>
-    </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  screenBg: { flex: 1, backgroundColor: "#f5f7fb" },
-  headerWrap: {
-    paddingTop: 32,
-    paddingBottom: 10,
-    backgroundColor: "#719AFF",
-    alignItems: "center",
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    marginBottom: 18,
-    shadowColor: "#719AFF",
-    shadowOpacity: 0.13,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#f7f8fb",
   },
-  pageTitle: { fontSize: 25, fontWeight: "700", color: "#fff", marginBottom: 2 },
-  dateText: { fontSize: 14, color: "#eef2ff" },
+  container: {
+    flex: 1,
+  },
+  title: {
+    textAlign: "center",
+    fontSize: 35,
+    fontWeight: "600",
+    marginTop: 15,
+    marginBottom: 0,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 75,
+    paddingTop: 12,
+  },
   emptyText: { textAlign: "center", margin: 10, color: "#719AFF", fontWeight: "500" },
   goalCard: {
     backgroundColor: "#fff",
     borderRadius: 14,
     padding: 18,
-    marginHorizontal: 16,
     marginBottom: 18,
     shadowColor: "#719AFF",
     shadowOpacity: 0.12,
@@ -246,7 +257,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 14,
     padding: 16,
-    marginHorizontal: 16,
     shadowColor: "#719AFF",
     shadowOpacity: 0.1,
     shadowRadius: 7,

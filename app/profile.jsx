@@ -64,7 +64,7 @@ export default function Profile() {
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <View style={styles.container}>
         {/* Header */}
-        <Text style={styles.title}>FinanceWise</Text>
+        <Text style={styles.title}>Financial Profile</Text>
 
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {/* Profile Header */}
