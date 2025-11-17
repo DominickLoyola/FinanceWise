@@ -1,13 +1,15 @@
 import { Ionicons } from "@expo/vector-icons"
 import { router } from "expo-router"
-import { addDoc, collection, deleteDoc, doc, getDoc, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore"
-import React, { useEffect, useRef, useState } from "react"
-import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native"
+import { addDoc, collection, deleteDoc, doc, getDoc, onSnapshot, orderBy, query, updateDoc } from "firebase/firestore"
+import React, { useEffect, useState } from "react"
+import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { generateAdvice } from "../advisors/localAdvisor"
 import { auth, db } from "./firebaseConfig"
 
 export default function AIAdvisor() {
+  const { width } = useWindowDimensions()
+  const isSmall = width < 900
   const STORAGE_KEY = "wise:messages:v1"
   const [messages, setMessages] = useState([
     { role: "assistant", content: "Hello! I'm Wise, your AI Financial Advisor. I can help with budgeting, taxes, investments, savings strategies, and more. What would you like to know today?" },
@@ -17,13 +19,7 @@ export default function AIAdvisor() {
   const [userProfile, setUserProfile] = useState(null)
   const [sessionsFS, setSessionsFS] = useState([]) // Firestore sessions: [{id,title,updatedAt,messages}]
   const [currentSessionId, setCurrentSessionId] = useState(null)
-  const [showHistory, setShowHistory] = useState(false)
-  const [savingsGoal, setSavingsGoal] = useState(null) // {current, target} or null
-  const scrollViewRef = useRef(null)
-  const quickQuestionsRef = useRef(null)
-  const [quickQuestionsY, setQuickQuestionsY] = useState(0)
-  const contentInnerRef = useRef(null)
-  const [lastUserMessageY, setLastUserMessageY] = useState(0)
+  const [historyOpen, setHistoryOpen] = useState(false)
 
   useEffect(() => {
     async function fetchProfile() {
@@ -224,11 +220,6 @@ export default function AIAdvisor() {
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Pressable onPress={() => setShowHistory(!showHistory)} hitSlop={8} style={{ padding: 4 }}>
-            <Ionicons name={showHistory ? "close" : "time-outline"} size={20} color="#4f46e5" />
-          </Pressable>
-        </View>
         <View style={styles.headerTopCentered}>
           <View style={styles.headerIconWrap}>
             <Ionicons name="sparkles" size={16} color="#fff" />
@@ -239,15 +230,8 @@ export default function AIAdvisor() {
       </View>
 
       <View style={styles.mainWrap}>
-        {/* Overlay to close sidebar when tapped */}
-        {showHistory && (
-          <Pressable 
-            style={styles.overlay} 
-            onPress={() => setShowHistory(false)}
-          />
-        )}
         {/* Sidebar - sessions (if signed in) or message history (guest) */}
-        {showHistory && (
+        {!isSmall && (
         <View style={styles.sidebar}>
           {auth.currentUser ? (
             <>
@@ -305,6 +289,53 @@ export default function AIAdvisor() {
           )}
         </View>
         )}
+        {isSmall && (
+          <>
+            <Pressable style={styles.historyFab} onPress={() => setHistoryOpen(true)} hitSlop={8}>
+              <Ionicons name="chatbubbles-outline" size={18} color="#fff" />
+              <Text style={{ color: "#fff", fontWeight: "800", fontSize: 12 }}>History</Text>
+            </Pressable>
+            {historyOpen && (
+              <View style={styles.drawerOverlay}>
+                <View style={styles.drawerPanel}>
+                  <View style={styles.drawerHeader}>
+                    <Text style={styles.sideHeaderTitle}>History</Text>
+                    <Pressable onPress={() => setHistoryOpen(false)} hitSlop={8}>
+                      <Ionicons name="close" size={20} color="#334155" />
+                    </Pressable>
+                  </View>
+                  <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.sideList} showsVerticalScrollIndicator={false}>
+                    {auth.currentUser ? (
+                      <>
+                        {sessionsFS.map((s) => (
+                          <View key={s.id} style={[styles.sideItem, s.id === currentSessionId && { borderColor: "#4f46e5", backgroundColor: "#eef2ff" }]}>
+                            <Pressable style={{ flex: 1 }} onPress={() => { selectSessionFS(s.id); setHistoryOpen(false) }}>
+                              <Text numberOfLines={1} style={[styles.sideTitle, s.id === currentSessionId && { color: "#1e3a8a" }]}>{s.title || "Untitled"}</Text>
+                              <Text style={styles.sideSub}>{s.updatedAt ? new Date(s.updatedAt).toLocaleDateString() : ""}</Text>
+                            </Pressable>
+                          </View>
+                        ))}
+                      </>
+                    ) : (
+                      <>
+                        {messages
+                          .filter((m) => m.role === "user")
+                          .slice()
+                          .reverse()
+                          .map((m, idx) => (
+                            <Pressable key={idx} style={styles.sideItem} onPress={() => { setInput(m.content); setHistoryOpen(false) }}>
+                              <Ionicons name="chatbubble-ellipses-outline" size={14} color="#1e3a8a" />
+                              <Text numberOfLines={1} style={styles.sideTitle}>{m.content}</Text>
+                            </Pressable>
+                          ))}
+                      </>
+                    )}
+                  </ScrollView>
+                </View>
+              </View>
+            )}
+          </>
+        )}
         {/* Main content */}
         <ScrollView 
           ref={scrollViewRef}
@@ -346,15 +377,8 @@ export default function AIAdvisor() {
           </View>
         </View>
 
-        {/* Quick Questions */}
-        <View 
-          ref={quickQuestionsRef} 
-          onLayout={(event) => {
-            const { y } = event.nativeEvent.layout
-            setQuickQuestionsY(y)
-          }}
-          style={{ marginBottom: 12 }}
-        >
+        {/* Quick Questions (always shown) */}
+        <View style={{ marginBottom: 12 }}>
           <Text style={styles.quickTitle}>Quick Questions</Text>
           <View style={styles.quickGrid}>
             {quickQuestions.map((q, idx) => (
@@ -363,9 +387,6 @@ export default function AIAdvisor() {
                 onPress={() => handleQuickQuestion(q.text)}
                 style={({ pressed }) => [styles.quickBtn, pressed && { opacity: 0.85 }]}
               >
-                <View style={{ flexShrink: 0 }}>
-                  <Ionicons name={q.icon} size={18} color="#1e40af" />
-                </View>
                 <Text style={styles.quickBtnText}>{q.text}</Text>
               </Pressable>
             ))}
@@ -572,6 +593,48 @@ const styles = StyleSheet.create({
     left: 0,
     zIndex: 20,
   },
+  historyFab: {
+    position: "absolute",
+    left: 10,
+    top: -40,
+    backgroundColor: "#4f46e5",
+    borderRadius: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    zIndex: 5,
+  },
+  drawerOverlay: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.25)",
+    zIndex: 10,
+  },
+  drawerPanel: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 280,
+    backgroundColor: "#fff",
+    borderRightWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  drawerHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 12,
+    paddingTop: 12,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderColor: "#e5e7eb",
+  },
   sideScroll: { flex: 1 },
   sideHeader: {
     flexDirection: "row",
@@ -621,7 +684,7 @@ const styles = StyleSheet.create({
   quickBtn: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 0,
     borderWidth: 1,
     borderColor: "#e5e7eb",
     backgroundColor: "#eff6ff",
@@ -631,25 +694,9 @@ const styles = StyleSheet.create({
     flexBasis: "48%",
     maxWidth: "48%",
     justifyContent: "center",
-    minHeight: 50, // Ensure minimum height for wrapped text
+    minHeight: 44,
   },
-  quickBtnText: { fontSize: 12, color: "#1e3a8a", fontWeight: "700", flex: 1, flexShrink: 1 },
-  backToQuestionsBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    backgroundColor: "#eff6ff",
-    borderWidth: 1,
-    borderColor: "#cbd5e1",
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    marginTop: 16,
-    marginBottom: 8,
-    alignSelf: "center",
-  },
-  backToQuestionsText: { fontSize: 14, color: "#1e40af", fontWeight: "600" },
+  quickBtnText: { fontSize: 13, color: "#1e3a8a", fontWeight: "700", textAlign: "center", textAlignVertical: "center" },
   avatar: {
     width: 44,
     height: 44,
