@@ -519,7 +519,7 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: "#ede9fe" },
   header: {
     paddingHorizontal: 16,
-    paddingTop: 35,
+    paddingTop: 50,
     paddingBottom: 10,
     backgroundColor: "#ede9fe",
     borderBottomWidth: 0,
@@ -608,7 +608,7 @@ const styles = StyleSheet.create({
   historyFab: {
     position: "absolute",
     left: 10,
-    top: -40,
+    top: -30,
     backgroundColor: "#4f46e5",
     borderRadius: 16,
     paddingVertical: 8,
@@ -622,7 +622,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     right: 0,
-    top: 0,
+    top: 10,
     bottom: 0,
     backgroundColor: "rgba(0,0,0,0.25)",
     zIndex: 10,
@@ -657,7 +657,7 @@ const styles = StyleSheet.create({
     paddingTop: 4,
   },
   sideHeaderTitle: { fontWeight: "800", color: "#334155", fontSize: 14 },
-  sideList: { paddingHorizontal: 8, gap: 8 },
+  sideList: { paddingHorizontal: 8, paddingTop: 12, gap: 8 },
   sideItem: {
     flexDirection: "row",
     alignItems: "center",
