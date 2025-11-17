@@ -16,5 +16,4 @@
 
 3. Scanning the QR Code
 # To scan the QR code, you will need to download Expo Go from the app store.
-# Once it's downloaded, simply scan the QR code from the terimnal with you
-# camera and tap on the link to open the project in Expo Go. 
+# Once it's downloaded, simply scan the QR code from the terimnal with your camera and tap on the link to open the project in Expo Go. 
