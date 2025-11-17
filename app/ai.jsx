@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons"
 import { router } from "expo-router"
-import { addDoc, collection, deleteDoc, doc, getDoc, onSnapshot, orderBy, query, updateDoc } from "firebase/firestore"
-import React, { useEffect, useState } from "react"
+import { addDoc, collection, deleteDoc, doc, getDoc, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore"
+import React, { useEffect, useRef, useState } from "react"
 import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { generateAdvice } from "../advisors/localAdvisor"
@@ -20,6 +20,12 @@ export default function AIAdvisor() {
   const [sessionsFS, setSessionsFS] = useState([]) // Firestore sessions: [{id,title,updatedAt,messages}]
   const [currentSessionId, setCurrentSessionId] = useState(null)
   const [historyOpen, setHistoryOpen] = useState(false)
+  const [savingsGoal, setSavingsGoal] = useState(null) // {current, target} or null
+  const scrollViewRef = useRef(null)
+  const quickQuestionsRef = useRef(null)
+  const contentInnerRef = useRef(null)
+  const [lastUserMessageY, setLastUserMessageY] = useState(0)
+  const [quickQuestionsY, setQuickQuestionsY] = useState(0)
 
   useEffect(() => {
     async function fetchProfile() {
@@ -378,7 +384,14 @@ export default function AIAdvisor() {
         </View>
 
         {/* Quick Questions (always shown) */}
-        <View style={{ marginBottom: 12 }}>
+        <View 
+          ref={quickQuestionsRef} 
+          onLayout={(event) => {
+            const { y } = event.nativeEvent.layout
+            setQuickQuestionsY(y)
+          }}
+          style={{ marginBottom: 12 }}
+        >
           <Text style={styles.quickTitle}>Quick Questions</Text>
           <View style={styles.quickGrid}>
             {quickQuestions.map((q, idx) => (
@@ -474,7 +487,6 @@ export default function AIAdvisor() {
           <Ionicons name="send" size={18} color="#fff" />
         </Pressable>
       </View>
-      <View style={{ height: 10 }} />
 
       {/* Bottom Navigation */}
       <View style={styles.tabBar}>
@@ -507,7 +519,7 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: "#ede9fe" },
   header: {
     paddingHorizontal: 16,
-    paddingTop: 10,
+    paddingTop: 35,
     paddingBottom: 10,
     backgroundColor: "#ede9fe",
     borderBottomWidth: 0,
@@ -551,7 +563,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   profileChipText: { fontSize: 12, color: "#166534", fontWeight: "600" },
-  content: { paddingHorizontal: 12, paddingBottom: 16, paddingTop: 12 },
+  content: { paddingHorizontal: 12, paddingBottom: 16, paddingTop: 24 },
   contentInner: {
     width: "100%",
     maxWidth: 720,
@@ -565,7 +577,7 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
     justifyContent: "center",
     paddingHorizontal: 12,
-    paddingTop: 8,
+    paddingTop: 16,
     position: "relative",
   },
   overlay: {
@@ -724,7 +736,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 12,
     paddingTop: 8,
-    marginBottom: 140,
+    marginBottom: 80,
     alignSelf: "center",
     width: "100%",
     maxWidth: 720,
