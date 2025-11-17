@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons"
 import { router } from "expo-router"
-import { addDoc, collection, deleteDoc, doc, getDoc, onSnapshot, orderBy, query, updateDoc } from "firebase/firestore"
-import React, { useEffect, useState } from "react"
+import { addDoc, collection, deleteDoc, doc, getDoc, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore"
+import React, { useEffect, useRef, useState } from "react"
 import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { generateAdvice } from "../advisors/localAdvisor"
@@ -18,6 +18,12 @@ export default function AIAdvisor() {
   const [sessionsFS, setSessionsFS] = useState([]) // Firestore sessions: [{id,title,updatedAt,messages}]
   const [currentSessionId, setCurrentSessionId] = useState(null)
   const [showHistory, setShowHistory] = useState(false)
+  const [savingsGoal, setSavingsGoal] = useState(null) // {current, target} or null
+  const scrollViewRef = useRef(null)
+  const quickQuestionsRef = useRef(null)
+  const [quickQuestionsY, setQuickQuestionsY] = useState(0)
+  const contentInnerRef = useRef(null)
+  const [lastUserMessageY, setLastUserMessageY] = useState(0)
 
   useEffect(() => {
     async function fetchProfile() {
@@ -33,6 +39,31 @@ export default function AIAdvisor() {
     }
     fetchProfile()
   }, [])
+
+  // Fetch savings goal
+  useEffect(() => {
+    if (!auth.currentUser) return
+    const q = query(
+      collection(db, "goals"),
+      where("userId", "==", auth.currentUser.uid)
+    )
+    const unsubscribe = onSnapshot(q, (snap) => {
+      // Find goal with title containing "Savings" (case-insensitive)
+      const savingsGoalDoc = snap.docs.find(doc => {
+        const title = doc.data().title?.toLowerCase() || ""
+        return title.includes("savings")
+      })
+      if (savingsGoalDoc) {
+        const goal = savingsGoalDoc.data()
+        setSavingsGoal({ current: goal.current, target: goal.target })
+      } else {
+        setSavingsGoal(null)
+      }
+    }, (error) => {
+      console.error("Error fetching savings goal:", error)
+    })
+    return () => unsubscribe()
+  }, [auth.currentUser?.uid])
 
   // Local-only mode
   const canUseOpenAI = false
@@ -60,6 +91,18 @@ export default function AIAdvisor() {
       }
     } catch {}
   }, [messages])
+
+  // Track when to scroll to user message
+  const [shouldScrollToUserMessage, setShouldScrollToUserMessage] = useState(false)
+  
+  useEffect(() => {
+    if (shouldScrollToUserMessage && lastUserMessageY > 0) {
+      setTimeout(() => {
+        scrollViewRef.current?.scrollTo({ y: lastUserMessageY - 50, animated: true })
+        setShouldScrollToUserMessage(false)
+      }, 200)
+    }
+  }, [shouldScrollToUserMessage, lastUserMessageY])
 
   // Subscribe to Firestore sessions when logged in
   useEffect(() => {
@@ -154,6 +197,8 @@ export default function AIAdvisor() {
     setMessages((prev) => [...prev, { role: "user", content: trimmed }])
     setInput("")
     setLoading(true)
+    setShouldScrollToUserMessage(true) // Trigger scroll to user message
+    
     try {
       // Local advisor only
       const out = generateAdvice(trimmed, userProfile, messages)
@@ -261,8 +306,12 @@ export default function AIAdvisor() {
         </View>
         )}
         {/* Main content */}
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.contentInner}>
+        <ScrollView 
+          ref={scrollViewRef}
+          contentContainerStyle={styles.content} 
+          showsVerticalScrollIndicator={false}
+        >
+        <View ref={contentInnerRef} style={styles.contentInner}>
         {/* Profile summary (approximate using available fields) */}
         <View style={styles.profileCard}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 8 }}>
@@ -278,41 +327,67 @@ export default function AIAdvisor() {
               <Text style={styles.pillLabel}>Current Balance</Text>
               <Text style={styles.pillValue}>${(userProfile?.currentBalance ?? 0).toLocaleString()}</Text>
             </View>
-            <View style={[styles.pill, { backgroundColor: "#ecfdf5" }]}>
+            <View style={[styles.pill, { backgroundColor: "#ecfdf5", minWidth: "97%", maxWidth: "97%" }]}>
               <Text style={[styles.pillLabel, { color: "#047857" }]}>Monthly Income (est.)</Text>
               <Text style={[styles.pillValue, { color: "#065f46" }]}>${Math.round(((userProfile?.annualIncome ?? 0) / 12)).toLocaleString()}</Text>
             </View>
-            <View style={[styles.pill, { backgroundColor: "#eff6ff" }]}>
+            <Pressable 
+              onPress={() => router.push("/Goals")}
+              style={[styles.pill, { backgroundColor: "#eff6ff", minWidth: "97%", maxWidth: "97%" }]}
+            >
               <Text style={[styles.pillLabel, { color: "#1d4ed8" }]}>Savings Goal</Text>
-              <Text style={[styles.pillValue, { color: "#1e40af" }]}>Set in Goals</Text>
-            </View>
+              <Text style={[styles.pillValue, { color: "#1e40af" }]}>
+                {savingsGoal 
+                  ? `$${savingsGoal.current.toLocaleString()} / $${savingsGoal.target.toLocaleString()}`
+                  : "Set in Goals"
+                }
+              </Text>
+            </Pressable>
           </View>
         </View>
 
         {/* Quick Questions */}
-        {messages.length <= 1 && (
-          <View style={{ marginBottom: 12 }}>
-            <Text style={styles.quickTitle}>Quick Questions</Text>
-            <View style={styles.quickGrid}>
-              {quickQuestions.map((q, idx) => (
-                <Pressable
-                  key={idx}
-                  onPress={() => handleQuickQuestion(q.text)}
-                  style={({ pressed }) => [styles.quickBtn, pressed && { opacity: 0.85 }]}
-                >
-                  <View style={{ flexShrink: 0 }}>
-                    <Ionicons name={q.icon} size={18} color="#1e40af" />
-                  </View>
-                  <Text style={styles.quickBtnText}>{q.text}</Text>
-                </Pressable>
-              ))}
-            </View>
+        <View 
+          ref={quickQuestionsRef} 
+          onLayout={(event) => {
+            const { y } = event.nativeEvent.layout
+            setQuickQuestionsY(y)
+          }}
+          style={{ marginBottom: 12 }}
+        >
+          <Text style={styles.quickTitle}>Quick Questions</Text>
+          <View style={styles.quickGrid}>
+            {quickQuestions.map((q, idx) => (
+              <Pressable
+                key={idx}
+                onPress={() => handleQuickQuestion(q.text)}
+                style={({ pressed }) => [styles.quickBtn, pressed && { opacity: 0.85 }]}
+              >
+                <View style={{ flexShrink: 0 }}>
+                  <Ionicons name={q.icon} size={18} color="#1e40af" />
+                </View>
+                <Text style={styles.quickBtnText}>{q.text}</Text>
+              </Pressable>
+            ))}
           </View>
-        )}
+        </View>
 
         {/* Chat */}
-        {messages.map((m, i) => (
-          <View key={i} style={{ flexDirection: m.role === "user" ? "row-reverse" : "row", gap: 10, marginBottom: 10 }}>
+        {messages.map((m, i) => {
+          // Find the index of the last user message
+          const lastUserMessageIndex = messages.map((msg, idx) => msg.role === "user" ? idx : -1).filter(idx => idx !== -1).pop()
+          const isLastUserMessage = m.role === "user" && i === lastUserMessageIndex
+          
+          return (
+          <View 
+            key={i} 
+            onLayout={isLastUserMessage ? (event) => {
+              const { y } = event.nativeEvent.layout
+              // Y position is relative to contentInner, which is what we need for scrolling
+              setLastUserMessageY(y)
+            } : undefined}
+            style={{ flexDirection: m.role === "user" ? "row-reverse" : "row", gap: 10, marginBottom: 10 }}
+          >
             <View style={[styles.avatar, m.role === "assistant" ? styles.avatarAssistant : styles.avatarUser]}>
               {m.role === "assistant" ? (
                 <Ionicons name="sparkles" size={16} color="#fff" />
@@ -337,7 +412,8 @@ export default function AIAdvisor() {
               </View>
             </View>
           </View>
-        ))}
+          )
+        })}
         {loading && (
           <View style={{ flexDirection: "row", gap: 10, marginBottom: 10 }}>
             <View style={[styles.avatar, styles.avatarAssistant]}>
@@ -347,6 +423,17 @@ export default function AIAdvisor() {
               <ActivityIndicator size="small" color="#1f6bff" />
             </View>
           </View>
+        )}
+        {messages.length > 1 && (
+          <Pressable
+            onPress={() => {
+              scrollViewRef.current?.scrollTo({ y: quickQuestionsY - 20, animated: true })
+            }}
+            style={styles.backToQuestionsBtn}
+          >
+            <Ionicons name="arrow-up-outline" size={16} color="#1e40af" />
+            <Text style={styles.backToQuestionsText}>Back to Quick Questions</Text>
+          </Pressable>
         )}
         </View>
         </ScrollView>
@@ -547,6 +634,22 @@ const styles = StyleSheet.create({
     minHeight: 50, // Ensure minimum height for wrapped text
   },
   quickBtnText: { fontSize: 12, color: "#1e3a8a", fontWeight: "700", flex: 1, flexShrink: 1 },
+  backToQuestionsBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: "#eff6ff",
+    borderWidth: 1,
+    borderColor: "#cbd5e1",
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 8,
+    alignSelf: "center",
+  },
+  backToQuestionsText: { fontSize: 14, color: "#1e40af", fontWeight: "600" },
   avatar: {
     width: 44,
     height: 44,
