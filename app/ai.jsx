@@ -516,12 +516,12 @@ export default function AIAdvisor() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: "#ede9fe" },
+  safeArea: { flex: 1, backgroundColor: "#ECE9FC" },
   header: {
     paddingHorizontal: 16,
     paddingTop: 50,
     paddingBottom: 10,
-    backgroundColor: "#ede9fe",
+    backgroundColor: "#ECE9FC",
     borderBottomWidth: 0,
     borderColor: "transparent",
     flexDirection: "row",

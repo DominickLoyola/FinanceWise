@@ -298,21 +298,6 @@ Points:
                       </Pressable>
                     ))}
                   </View>
-
-                  {quizAnswered.length < lesson.quiz.length && (
-                    <Pressable
-                      style={styles.nextButton}
-                      onPress={() => {
-                        if (quizAnswered.length + 1 < lesson.quiz.length) {
-                          // Continue to next question
-                        }
-                      }}
-                    >
-                      <Text style={styles.nextButtonText}>
-                        {quizAnswered.length + 1 === lesson.quiz.length ? "Finish" : "Next"}
-                      </Text>
-                    </Pressable>
-                  )}
                 </>
               )}
             </ScrollView>
@@ -432,7 +417,7 @@ Points:
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#f7f8fb",
+    backgroundColor: "#ECE9FC",
   },
   container: {
     flex: 1,
@@ -503,6 +488,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     borderBottomWidth: 1,
     borderBottomColor: "#e9ecf5",
+    backgroundColor: "#ECE9FC",
   },
   placeholder: {
     width: 28,
@@ -588,13 +574,15 @@ const styles = StyleSheet.create({
   },
   quizProgress: {
     fontSize: 12,
-    color: "#999",
+    color: "#000",
     fontWeight: "600",
     marginBottom: 8,
   },
   progressBar: {
     height: 6,
     backgroundColor: "#e9ecf5",
+    borderWidth: 1,
+    borderColor: "#000",
     borderRadius: 6,
     overflow: "hidden",
     marginBottom: 24,
@@ -616,8 +604,9 @@ const styles = StyleSheet.create({
   },
   optionButton: {
     borderWidth: 2,
-    borderColor: "#e9ecf5",
+    borderColor: "#000",
     borderRadius: 16,
+    backgroundColor: "#fff",
     paddingVertical: 18,
     paddingHorizontal: 18,
     marginBottom: 12,
@@ -632,18 +621,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#111",
     lineHeight: 24,
-  },
-  nextButton: {
-    backgroundColor: "#1f6bff",
-    borderRadius: 12,
-    paddingVertical: 12,
-    alignItems: "center",
-    marginTop: 12,
-  },
-  nextButtonText: {
-    color: "#fff",
-    fontWeight: "700",
-    fontSize: 14,
   },
   resultsContainer: {
     alignItems: "center",

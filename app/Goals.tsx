@@ -1,27 +1,27 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  onSnapshot,
-  query,
-  where,
+    addDoc,
+    collection,
+    deleteDoc,
+    doc,
+    onSnapshot,
+    query,
+    where,
 } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
-  Alert,
-  Button,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    Alert,
+    Button,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { auth, db } from "./firebaseConfig";
@@ -216,7 +216,7 @@ export default function GoalsPage() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#f7f8fb",
+    backgroundColor: "#ECE9FC",
   },
   container: {
     flex: 1,

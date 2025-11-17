@@ -245,7 +245,7 @@ export default function Balance() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#f7f8fb' },
+  safeArea: { flex: 1, backgroundColor: '#ECE9FC' },
   container: { padding: 16, alignItems: 'center' },
   appTitle: { fontSize: 35, fontWeight: '700', marginBottom: 8 },
   balanceCard: { borderRadius: 16, padding: 16, alignSelf: 'stretch', marginBottom: 12 },

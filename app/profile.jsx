@@ -158,7 +158,7 @@ export default function Profile() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#f7f8fb",
+    backgroundColor: "#ECE9FC",
   },
   container: {
     flex: 1,
