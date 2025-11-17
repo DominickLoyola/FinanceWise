@@ -17,6 +17,7 @@ export default function AIAdvisor() {
   const [userProfile, setUserProfile] = useState(null)
   const [sessionsFS, setSessionsFS] = useState([]) // Firestore sessions: [{id,title,updatedAt,messages}]
   const [currentSessionId, setCurrentSessionId] = useState(null)
+  const [showHistory, setShowHistory] = useState(false)
 
   useEffect(() => {
     async function fetchProfile() {
@@ -178,21 +179,30 @@ export default function AIAdvisor() {
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       {/* Header */}
       <View style={styles.header}>
+        <View style={styles.headerLeft}>
+          <Pressable onPress={() => setShowHistory(!showHistory)} hitSlop={8} style={{ padding: 4 }}>
+            <Ionicons name={showHistory ? "close" : "time-outline"} size={20} color="#4f46e5" />
+          </Pressable>
+        </View>
         <View style={styles.headerTopCentered}>
           <View style={styles.headerIconWrap}>
-            <Ionicons name="sparkles" size={18} color="#fff" />
+            <Ionicons name="sparkles" size={16} color="#fff" />
           </View>
           <Text style={styles.headerTitle}>Wise</Text>
           
         </View>
-        <View style={styles.profileChip}>
-          <Ionicons name="person" size={14} color="#166534" />
-          <Text style={styles.profileChipText}>Profile {userProfile ? "Active" : "Not Signed In"}</Text>
-        </View>
       </View>
 
       <View style={styles.mainWrap}>
+        {/* Overlay to close sidebar when tapped */}
+        {showHistory && (
+          <Pressable 
+            style={styles.overlay} 
+            onPress={() => setShowHistory(false)}
+          />
+        )}
         {/* Sidebar - sessions (if signed in) or message history (guest) */}
+        {showHistory && (
         <View style={styles.sidebar}>
           {auth.currentUser ? (
             <>
@@ -249,6 +259,7 @@ export default function AIAdvisor() {
             </>
           )}
         </View>
+        )}
         {/* Main content */}
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.contentInner}>
@@ -273,7 +284,7 @@ export default function AIAdvisor() {
             </View>
             <View style={[styles.pill, { backgroundColor: "#eff6ff" }]}>
               <Text style={[styles.pillLabel, { color: "#1d4ed8" }]}>Savings Goal</Text>
-              <Text style={[styles.pillValue, { color: "#1e40af" }]}>Set in Profile</Text>
+              <Text style={[styles.pillValue, { color: "#1e40af" }]}>Set in Goals</Text>
             </View>
           </View>
         </View>
@@ -289,7 +300,9 @@ export default function AIAdvisor() {
                   onPress={() => handleQuickQuestion(q.text)}
                   style={({ pressed }) => [styles.quickBtn, pressed && { opacity: 0.85 }]}
                 >
-                  <Ionicons name={q.icon} size={18} color="#1e40af" />
+                  <View style={{ flexShrink: 0 }}>
+                    <Ionicons name={q.icon} size={18} color="#1e40af" />
+                  </View>
                   <Text style={styles.quickBtnText}>{q.text}</Text>
                 </Pressable>
               ))}
@@ -391,19 +404,34 @@ const styles = StyleSheet.create({
     backgroundColor: "#ede9fe",
     borderBottomWidth: 0,
     borderColor: "transparent",
-    flexDirection: "column",
-    justifyContent: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
     position: "relative",
   },
-  headerTopCentered: { alignItems: "center", gap: 6, width: "100%" },
+  headerLeft: {
+    flex: 1,
+    alignItems: "flex-start",
+    justifyContent: "center",
+  },
+  headerTopCentered: { 
+    position: "absolute",
+    left: 0,
+    right: 0,
+    alignItems: "center", // Center the logo above the text
+    gap: 6,
+    justifyContent: "center",
+    paddingLeft: 0, // Position from left edge to move it more left
+  },
   headerIconWrap: { backgroundColor: "#4f46e5", borderRadius: 12, padding: 8 },
   headerTitle: { fontSize: 28, fontWeight: "900", color: "#0f172a", textAlign: "center" },
   headerSubtitle: { fontSize: 14, color: "#475569", textAlign: "center" },
+  headerRight: {
+    flex: 1,
+    alignItems: "flex-end",
+    justifyContent: "center",
+  },
   profileChip: {
-    position: "absolute",
-    right: 16,
-    top: 10,
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
@@ -432,21 +460,30 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     position: "relative",
   },
+  overlay: {
+    position: "absolute",
+    top: -80,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    zIndex: 10,
+  },
   sidebar: {
     width: 260,
     borderRightWidth: 1,
     borderColor: "#e5e7eb",
     backgroundColor: "#ffffff",
-    paddingTop: 8,
+    paddingTop: 30, // Add padding to show header buttons
     paddingBottom: 8,
     borderRadius: 0,
     overflow: "hidden",
     position: "absolute",
     marginLeft: 0,
-    top: -93, // align near the "Profile not signed in" chip
+    top: -80, // Align with header
     bottom: -139, // stop just above bottom navigation
     left: 0,
-    zIndex: 1,
+    zIndex: 20,
   },
   sideScroll: { flex: 1 },
   sideHeader: {
@@ -507,8 +544,9 @@ const styles = StyleSheet.create({
     flexBasis: "48%",
     maxWidth: "48%",
     justifyContent: "center",
+    minHeight: 50, // Ensure minimum height for wrapped text
   },
-  quickBtnText: { fontSize: 13, color: "#1e3a8a", fontWeight: "700" },
+  quickBtnText: { fontSize: 12, color: "#1e3a8a", fontWeight: "700", flex: 1, flexShrink: 1 },
   avatar: {
     width: 44,
     height: 44,

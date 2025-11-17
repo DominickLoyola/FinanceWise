@@ -69,7 +69,7 @@ export default function Profile() {
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {/* Profile Header */}
           <LinearGradient
-            colors={["#6F8DF1", "#9F72DB"]}
+            colors={["#4da7ceff", "#65cec9ff"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.profileSection}
