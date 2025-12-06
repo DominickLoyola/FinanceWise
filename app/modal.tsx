@@ -1,8 +1,8 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
 import { addDoc, collection, doc, getDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
-import React, { useState } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth, db } from './firebaseConfig';
 
@@ -21,6 +21,131 @@ export default function Modal() {
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [customCategories, setCustomCategories] = useState<Array<{ id: string; icon: string; label: string }>>([]);
+  const [showCreateCategory, setShowCreateCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryIcon, setNewCategoryIcon] = useState('📝');
+
+  // Load custom categories from Firestore
+  useEffect(() => {
+    const loadCustomCategories = async () => {
+      if (!auth.currentUser) return;
+      
+      try {
+        const userDocRef = doc(db, "users", auth.currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          const savedCategories = userData.customCategories || [];
+          setCustomCategories(savedCategories);
+        }
+      } catch (error) {
+        console.error("Error loading custom categories:", error);
+      }
+    };
+
+    loadCustomCategories();
+  }, []);
+
+  // Get all categories (default + custom)
+  const allCategories = [...categories, ...customCategories];
+
+  // Handle creating a new custom category
+  const handleCreateCategory = async () => {
+    if (!newCategoryName.trim()) {
+      alert('Please enter a category name');
+      return;
+    }
+
+    if (!auth.currentUser) {
+      alert('You must be logged in to create categories');
+      return;
+    }
+
+    // Check if category name already exists
+    const categoryExists = allCategories.some(
+      cat => cat.label.toLowerCase() === newCategoryName.trim().toLowerCase()
+    );
+
+    if (categoryExists) {
+      alert('This category already exists');
+      return;
+    }
+
+    try {
+      const newCategory = {
+        id: `custom_${Date.now()}`,
+        icon: newCategoryIcon || '📝',
+        label: newCategoryName.trim(),
+      };
+
+      const updatedCategories = [...customCategories, newCategory];
+      setCustomCategories(updatedCategories);
+
+      // Save to Firestore
+      const userDocRef = doc(db, "users", auth.currentUser.uid);
+      await updateDoc(userDocRef, {
+        customCategories: updatedCategories,
+      });
+
+      // Reset form
+      setNewCategoryName('');
+      setNewCategoryIcon('📝');
+      setShowCreateCategory(false);
+      
+      // Auto-select the newly created category
+      setSelectedCategory(newCategory.id);
+    } catch (error) {
+      console.error("Error saving custom category:", error);
+      alert('Failed to save category. Please try again.');
+    }
+  };
+
+  // Handle deleting a custom category
+  const handleDeleteCategory = async (categoryId: string, categoryLabel: string) => {
+    if (!auth.currentUser) {
+      alert('You must be logged in to delete categories');
+      return;
+    }
+
+    // Show confirmation dialog
+    Alert.alert(
+      'Delete Category',
+      `Are you sure you want to delete "${categoryLabel}"? This will not delete expenses that used this category.`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const updatedCategories = customCategories.filter(cat => cat.id !== categoryId);
+              setCustomCategories(updatedCategories);
+
+              // Save to Firestore
+              if (!auth.currentUser) return;
+              const userDocRef = doc(db, "users", auth.currentUser.uid);
+              await updateDoc(userDocRef, {
+                customCategories: updatedCategories,
+              });
+
+              // Clear selection if the deleted category was selected
+              if (selectedCategory === categoryId) {
+                setSelectedCategory('');
+              }
+            } catch (error) {
+              console.error("Error deleting custom category:", error);
+              alert('Failed to delete category. Please try again.');
+            }
+          },
+        },
+      ]
+    );
+  };
 
   const handleSubmit = async () => {
     if (!amount || !selectedCategory) {
@@ -35,7 +160,13 @@ export default function Modal() {
 
     try {
       const expenseAmount = parseFloat(amount);
-      const expenseCategory = categories.find(c => c.id === selectedCategory)?.label || '';
+      const selectedCategoryData = allCategories.find(c => c.id === selectedCategory);
+      const expenseCategory = selectedCategoryData?.label || '';
+      
+      if (!expenseCategory) {
+        alert('Please select a valid category');
+        return;
+      }
       
       // Get current user data
       const userDocRef = doc(db, "users", auth.currentUser.uid);
@@ -58,6 +189,7 @@ export default function Modal() {
       const expense = {
         amount: expenseAmount,
         category: expenseCategory,
+        categoryIcon: selectedCategoryData?.icon || '',
         description: description || expenseCategory,
         date: date.toISOString(),
         createdAt: serverTimestamp(),
@@ -103,20 +235,79 @@ export default function Modal() {
 
           <Text style={styles.label}>Category</Text>
           <View style={styles.categoryGrid}>
-            {categories.map((category) => (
-              <Pressable
-                key={category.id}
-                style={[
-                  styles.categoryButton,
-                  selectedCategory === category.id && styles.categoryButtonSelected,
-                ]}
-                onPress={() => setSelectedCategory(category.id)}
-              >
-                <Text style={styles.categoryIcon}>{category.icon}</Text>
-                <Text style={styles.categoryLabel}>{category.label}</Text>
-              </Pressable>
-            ))}
+            {allCategories.map((category) => {
+              const isCustomCategory = category.id.startsWith('custom_');
+              return (
+                <View key={category.id} style={styles.categoryButtonWrapper}>
+                  <Pressable
+                    style={[
+                      styles.categoryButton,
+                      selectedCategory === category.id && styles.categoryButtonSelected,
+                    ]}
+                    onPress={() => setSelectedCategory(category.id)}
+                  >
+                    <Text style={styles.categoryIcon}>{category.icon}</Text>
+                    <Text style={styles.categoryLabel}>{category.label}</Text>
+                  </Pressable>
+                  {isCustomCategory && (
+                    <Pressable
+                      style={styles.deleteCategoryButton}
+                      onPress={() => handleDeleteCategory(category.id, category.label)}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      <Text style={styles.deleteCategoryIcon}>✕</Text>
+                    </Pressable>
+                  )}
+                </View>
+              );
+            })}
+            <Pressable
+              style={[styles.categoryButton, styles.createCategoryButton]}
+              onPress={() => setShowCreateCategory(!showCreateCategory)}
+            >
+              <Text style={styles.categoryIcon}>➕</Text>
+              <Text style={styles.categoryLabel}>Custom</Text>
+            </Pressable>
           </View>
+
+          {showCreateCategory && (
+            <View style={styles.createCategoryContainer}>
+              <Text style={styles.label}>Create Custom Category</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Category name"
+                placeholderTextColor="#bab8b8"
+                value={newCategoryName}
+                onChangeText={setNewCategoryName}
+              />
+              <TextInput
+                style={[styles.input, styles.iconInput]}
+                placeholder="Icon (emoji)"
+                placeholderTextColor="#bab8b8"
+                value={newCategoryIcon}
+                onChangeText={setNewCategoryIcon}
+                maxLength={2}
+              />
+              <View style={styles.createCategoryActions}>
+                <Pressable
+                  style={styles.cancelButton}
+                  onPress={() => {
+                    setShowCreateCategory(false);
+                    setNewCategoryName('');
+                    setNewCategoryIcon('📝');
+                  }}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.saveCategoryButton}
+                  onPress={handleCreateCategory}
+                >
+                  <Text style={styles.saveCategoryButtonText}>Create</Text>
+                </Pressable>
+              </View>
+            </View>
+          )}
 
           <Text style={styles.label}>Description (Optional)</Text>
           <TextInput
@@ -224,8 +415,12 @@ const styles = StyleSheet.create({
     gap: 12,
     marginBottom: 24,
   },
-  categoryButton: {
+  categoryButtonWrapper: {
     width: '30%',
+    position: 'relative',
+  },
+  categoryButton: {
+    width: '100%',
     backgroundColor: 'white',
     padding: 16,
     borderRadius: 12,
@@ -256,5 +451,66 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
+  },
+  createCategoryButton: {
+    borderStyle: 'dashed',
+  },
+  createCategoryContainer: {
+    backgroundColor: 'white',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#e1e1e1',
+  },
+  iconInput: {
+    marginBottom: 16,
+  },
+  createCategoryActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: '#f0f0f0',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  saveCategoryButton: {
+    flex: 1,
+    backgroundColor: '#1f6bff',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+  },
+  saveCategoryButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: 'white',
+  },
+  deleteCategoryButton: {
+    position: 'absolute',
+    top: -6,
+    right: -6,
+    backgroundColor: '#ff3c3c',
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+    borderWidth: 2,
+    borderColor: 'white',
+  },
+  deleteCategoryIcon: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
 });

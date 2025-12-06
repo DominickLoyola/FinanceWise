@@ -65,28 +65,52 @@ export default function Index() {
       const userDocRef = doc(db, "users", auth.currentUser.uid);
       const userDoc = await getDoc(userDocRef);
 
+      let customCategories = [];
       if (userDoc.exists()) {
         const userData = userDoc.data();
         if (userData.currentBalance !== undefined && userData.currentBalance !== null) setBalance(userData.currentBalance);
         if (userData.name) setUserName(userData.name);
         if (userData.annualIncome !== undefined && userData.annualIncome !== null) setAnnualIncome(userData.annualIncome);
         if (userData.totalSpent !== undefined && userData.totalSpent !== null) setTotalSpent(userData.totalSpent);
+        customCategories = userData.customCategories || [];
       }
 
       const expensesRef = collection(db, "users", auth.currentUser.uid, "expenses");
       const expensesQuery = query(expensesRef, orderBy("date", "desc"));
       const expensesSnapshot = await getDocs(expensesQuery);
-
+      
       const expensesList = [];
       expensesSnapshot.forEach((doc) => {
         const data = doc.data();
+        // Use saved categoryIcon if available (for both default and custom categories)
+        // For old expenses without categoryIcon, fall back to FontAwesome icons
+        let categoryIcon = data.categoryIcon;
+        let isEmoji = false;
+        
+        if (categoryIcon) {
+          // If categoryIcon exists, it's an emoji (for both default and custom categories)
+          isEmoji = true;
+        } else {
+          // For old expenses without categoryIcon, try to get emoji from custom categories first
+          const customCat = customCategories.find(c => c.label === data.category);
+          if (customCat) {
+            categoryIcon = customCat.icon;
+            isEmoji = true;
+          } else {
+            // Fall back to FontAwesome icon for old default category expenses
+            categoryIcon = getCategoryIcon(data.category);
+            isEmoji = false;
+          }
+        }
+        
         expensesList.push({
           id: doc.id,
           title: data.description || data.category,
           category: data.category,
           amount: data.amount,
           date: data.date,
-          icon: getCategoryIcon(data.category),
+          icon: categoryIcon,
+          isEmoji: isEmoji,
         });
       });
 
@@ -174,11 +198,15 @@ export default function Index() {
               {transactions.map((transaction) => (
                 <View key={transaction.id} style={styles.transactionCard}>
                   <View style={styles.transactionLeft}>
-                    <FontAwesome5
-                      name={transaction.icon}
-                      size={18}
-                      color={getCategoryColor(transaction.category)}
-                    />
+                    {transaction.isEmoji ? (
+                      <Text style={[styles.emojiIcon, { fontSize: 18 }]}>{transaction.icon}</Text>
+                    ) : (
+                      <FontAwesome5
+                        name={transaction.icon}
+                        size={18}
+                        color={getCategoryColor(transaction.category)}
+                      />
+                    )}
                     <View style={styles.transactionTextWrap}>
                       <Text style={styles.transactionTitle}>{transaction.title}</Text>
                       <Text style={styles.transactionSubtitle}>
@@ -402,5 +430,10 @@ const styles = StyleSheet.create({
   bottomSpacer: {
     height: 0,
     backgroundColor: "transparent",
+  },
+  emojiIcon: {
+    width: 18,
+    height: 18,
+    textAlign: "center",
   },
 });
