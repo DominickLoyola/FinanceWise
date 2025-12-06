@@ -230,7 +230,7 @@ export default function AIAdvisor() {
           <View style={styles.headerIconWrap}>
             <Ionicons name="sparkles" size={16} color="#fff" />
           </View>
-          <Text style={styles.headerTitle}>Wise</Text>
+          <Text style={styles.headerTitle}>FinanceWise</Text>
           
         </View>
       </View>
