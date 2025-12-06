@@ -217,29 +217,7 @@ export default function Balance() {
         <View style={{ height: 80 }} />
       </ScrollView>
 
-      {/* Bottom Navigation (same visual as home) */}
-      <View style={styles.tabBar}>
-        <Pressable style={styles.tabItem} onPress={() => router.push("/home")}>
-          <Ionicons name="home" size={22} color="#777" />
-          <Text style={styles.tabLabel}>Home</Text>
-        </Pressable>
-        <Pressable style={styles.tabItem} onPress={() => router.push("/lessons")}>
-          <Ionicons name="book" size={22} color="#777" />
-          <Text style={styles.tabLabel}>Learn</Text>
-        </Pressable>
-        <Pressable style={styles.tabItem} onPress={() => router.push('/ai')}>
-          <Ionicons name="sparkles" size={22} color="#777" />
-          <Text style={styles.tabLabel}>AI Advisor</Text>
-        </Pressable>
-        <Pressable style={styles.tabItem} onPress={() => router.push("/Goals")}>
-          <Ionicons name="flag" size={22} color="#777" />
-          <Text style={styles.tabLabel}>Goals</Text>
-        </Pressable>
-        <Pressable style={styles.tabItem} onPress={() => router.push("/profile")}>
-          <Ionicons name="person" size={22} color="#777" />
-          <Text style={styles.tabLabel}>Profile</Text>
-        </Pressable>
-      </View>
+      
     </SafeAreaView>
   );
 }
