@@ -10,7 +10,7 @@ export const categories = [
   { id: 'food', icon: '🍔', label: 'Food' },
   { id: 'transport', icon: '🚗', label: 'Transport' },
   { id: 'housing', icon: '🏠', label: 'Housing' },
-  { id: 'entertainment', icon: '🎮', label: 'Entertainment' },
+  { id: 'entertainment', icon: '🎮', label: 'Fun' },
   { id: 'shopping', icon: '🛍️', label: 'Shopping' },
   { id: 'health', icon: '🏥', label: 'Health' },
 ];
@@ -76,7 +76,7 @@ export default function Modal() {
     try {
       const newCategory = {
         id: `custom_${Date.now()}`,
-        icon: newCategoryIcon || '📝',
+        icon: newCategoryIcon,
         label: newCategoryName.trim(),
       };
 
