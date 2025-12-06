@@ -85,7 +85,7 @@ export default function Modal() {
       <View style={styles.container}>
         {/* Back Button Header */}
         <View style={styles.backButton}>
-          <Text style={styles.backButtonText}>Swipe down from here to go Home</Text>
+          <Text style={styles.backButtonText}>Swipe down to go back</Text>
         </View>
         
         <Text style={styles.title}>FinanceWise</Text>
@@ -95,7 +95,7 @@ export default function Modal() {
           <TextInput
             style={styles.input}
             placeholder="$20.00"
-            placeholderTextColor="#666"
+            placeholderTextColor="#bab8b8"
             value={amount}
             onChangeText={setAmount}
             keyboardType="decimal-pad"
@@ -122,7 +122,7 @@ export default function Modal() {
           <TextInput
             style={styles.input}
             placeholder="What did you spend on?"
-            placeholderTextColor="#666"
+            placeholderTextColor="#bab8b8"
             value={description}
             onChangeText={setDescription}
           />
