@@ -9,15 +9,17 @@ export default function Lessons() {
   const [selectedLesson, setSelectedLesson] = useState(null)
   const [quizActive, setQuizActive] = useState(false)
   const [quizScore, setQuizScore] = useState(0)
-  const [quizAnswered, setQuizAnswered] = useState([])
+  const [quizAnswered, setQuizAnswered] = useState([]) // [questionIndex] = selectedAnswerIndex
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
+  const [showResults, setShowResults] = useState(false)
 
   const lessons = [
-  {
-    id: 1,
-    title: "Budgeting 101",
-    icon: "calculator",
-    description: "Learn the basics of creating and managing a budget",
-    content: `Budgeting is the foundation of financial health. A budget helps you track income and expenses and plan for your goals.
+    {
+      id: 1,
+      title: "Budgeting 101",
+      icon: "calculator",
+      description: "Learn the basics of creating and managing a budget",
+      content: `Budgeting is the foundation of financial health. A budget helps you track income and expenses and plan for your goals.
 
 Key Steps:
 1. Calculate your total monthly income
@@ -28,28 +30,28 @@ Key Steps:
 6. Adjust your budget as your situation changes
 7. Set short-term and long-term goals
 8. Use budgeting tools to simplify tracking`,
-    qna: [
-      { q: "Why is budgeting important?", a: "It helps you control spending, save money, reach goals, and avoid debt." },
-      { q: "What's the 50/30/20 rule?", a: "50% to needs, 30% to wants, 20% to savings/debt repayment." },
-      { q: "How often should you review your budget?", a: "Ideally every month or whenever your finances change." },
-      { q: "What is a fixed expense?", a: "A recurring, predictable expense (e.g., rent, subscriptions)." },
-      { q: "List one way to track spending.", a: "Use a spreadsheet, budgeting app, or keep receipts." },
-      { q: "Name a common budgeting mistake.", a: "Forgetting irregular expenses or underestimating costs." },
-      { q: "How can budgeting reduce financial stress?", a: "It gives you a plan and helps you avoid overspending." },
-      { q: "How do goals fit into a budget?", a: "Budgets let you allocate money toward your financial goals." },
-    ],
-    quiz: [
-      { q: "What should you do first when budgeting?", options: ["Set goals", "List expenses", "Calculate income", "Cut costs"], correct: 2 },
-      { q: "What's a fixed expense?", options: ["Groceries", "Rent", "Entertainment", "Vacation"], correct: 1 },
-      { q: "How often should you check your budget?", options: ["Annually", "Monthly", "Never", "Every five years"], correct: 1 },
-    ],
-  },
-  {
-    id: 2,
-    title: "Saving Strategies",
-    icon: "piggy-bank",
-    description: "Discover practical ways to save money",
-    content: `Saving strengthens your financial security and helps you reach your goals faster.
+      qna: [
+        { q: "Why is budgeting important?", a: "It helps you control spending, save money, reach goals, and avoid debt." },
+        { q: "What's the 50/30/20 rule?", a: "50% to needs, 30% to wants, 20% to savings/debt repayment." },
+        { q: "How often should you review your budget?", a: "Ideally every month or whenever your finances change." },
+        { q: "What is a fixed expense?", a: "A recurring, predictable expense (e.g., rent, subscriptions)." },
+        { q: "List one way to track spending.", a: "Use a spreadsheet, budgeting app, or keep receipts." },
+        { q: "Name a common budgeting mistake.", a: "Forgetting irregular expenses or underestimating costs." },
+        { q: "How can budgeting reduce financial stress?", a: "It gives you a plan and helps you avoid overspending." },
+        { q: "How do goals fit into a budget?", a: "Budgets let you allocate money toward your financial goals." },
+      ],
+      quiz: [
+        { q: "What should you do first when budgeting?", options: ["Set goals", "List expenses", "Calculate income", "Cut costs"], correct: 2 },
+        { q: "What's a fixed expense?", options: ["Groceries", "Rent", "Entertainment", "Vacation"], correct: 1 },
+        { q: "How often should you check your budget?", options: ["Annually", "Monthly", "Never", "Every five years"], correct: 1 },
+      ],
+    },
+    {
+      id: 2,
+      title: "Saving Strategies",
+      icon: "piggy-bank",
+      description: "Discover practical ways to save money",
+      content: `Saving strengthens your financial security and helps you reach your goals faster.
 
 Top Strategies:
 1. Build an emergency fund
@@ -60,28 +62,28 @@ Top Strategies:
 6. Plan for big expenses in advance
 7. Take advantage of discounts and cash-back
 8. Set clear, measurable savings goals`,
-    qna: [
-      { q: "How much should an emergency fund cover?", a: "3–6 months of basic living expenses." },
-      { q: "What is an automatic transfer?", a: "A scheduled move from checking to savings—it makes saving effortless." },
-      { q: "How can you make saving easier?", a: "Set up scheduled transfers or use round-up saving apps." },
-      { q: "What's the benefit of a high-yield savings account?", a: "It pays you more interest than standard accounts." },
-      { q: "Why should you avoid impulse buys?", a: "They can derail your savings goals." },
-      { q: "Give a tip to save on groceries.", a: "Shop with a list and avoid shopping hungry." },
-      { q: "Why is setting a specific goal important?", a: "Clear goals keep you motivated and focused." },
-      { q: "How can you cut monthly expenses?", a: "Cancel unused subscriptions; shop for new insurance rates." },
-    ],
-    quiz: [
-      { q: "What's a good emergency fund amount?", options: ["1 month", "3–6 months", "12 months", "1 year"], correct: 1 },
-      { q: "Why use automatic transfers?", options: ["Pay bills", "Save without thinking", "Spend more", "Buy stocks"], correct: 1 },
-      { q: "Which saves you money?", options: ["Impulse buys", "Eating out daily", "Shopping with a list", "Late fees"], correct: 2 },
-    ],
-  },
-  {
-    id: 3,
-    title: "Investing Basics",
-    icon: "chart-line",
-    description: "Understand the essentials of investing money",
-    content: `Investing lets your money grow. It involves putting funds into assets like stocks or bonds.
+      qna: [
+        { q: "How much should an emergency fund cover?", a: "3–6 months of basic living expenses." },
+        { q: "What is an automatic transfer?", a: "A scheduled move from checking to savings—it makes saving effortless." },
+        { q: "How can you make saving easier?", a: "Set up scheduled transfers or use round-up saving apps." },
+        { q: "What's the benefit of a high-yield savings account?", a: "It pays you more interest than standard accounts." },
+        { q: "Why should you avoid impulse buys?", a: "They can derail your savings goals." },
+        { q: "Give a tip to save on groceries.", a: "Shop with a list and avoid shopping hungry." },
+        { q: "Why is setting a specific goal important?", a: "Clear goals keep you motivated and focused." },
+        { q: "How can you cut monthly expenses?", a: "Cancel unused subscriptions; shop for new insurance rates." },
+      ],
+      quiz: [
+        { q: "What's a good emergency fund amount?", options: ["1 month", "3–6 months", "12 months", "1 year"], correct: 1 },
+        { q: "Why use automatic transfers?", options: ["Pay bills", "Save without thinking", "Spend more", "Buy stocks"], correct: 1 },
+        { q: "Which saves you money?", options: ["Impulse buys", "Eating out daily", "Shopping with a list", "Late fees"], correct: 2 },
+      ],
+    },
+    {
+      id: 3,
+      title: "Investing Basics",
+      icon: "chart-line",
+      description: "Understand the essentials of investing money",
+      content: `Investing lets your money grow. It involves putting funds into assets like stocks or bonds.
 
 Essentials:
 1. Start investing early—time in the market matters
@@ -92,28 +94,28 @@ Essentials:
 6. Know the difference between stocks, bonds, and funds
 7. Consider low-cost index funds or ETFs
 8. Stay educated and avoid "get rich quick" promises`,
-    qna: [
-      { q: "What is diversification?", a: "Spreading investments to reduce risk." },
-      { q: "Why is early investing important?", a: "Gives your money more time to compound and grow." },
-      { q: "What’s a stock?", a: "Ownership in a company." },
-      { q: "What's a bond?", a: "A loan to a company or government for fixed interest." },
-      { q: "Name one way to reduce investing risk.", a: "Diversify across asset types and industries." },
-      { q: "What should you NOT do during a downturn?", a: "Panic sell your investments." },
-      { q: "What is an ETF?", a: "Exchange-traded fund; trades like a stock, holds a bundle of assets." },
-      { q: "Why avoid 'get rich quick' schemes?", a: "They are usually high-risk or scams." },
-    ],
-    quiz: [
-      { q: "What type of asset is a bond?", options: ["Equity", "Loan", "Commodity", "Real estate"], correct: 1 },
-      { q: "How can you reduce investment risk?", options: ["Invest all in one stock", "Diversify", "Panic sell", "Ignore markets"], correct: 1 },
-      { q: "What’s the benefit of starting young?", options: ["Compound growth", "Lower taxes", "Instant profit", "None"], correct: 0 },
-    ],
-  },
-  {
-    id: 4,
-    title: "Credit & Loans",
-    icon: "credit-card",
-    description: "Master the smart use of credit and loans",
-    content: `Credit, when used responsibly, allows you to borrow money for purchases, but requires discipline.
+      qna: [
+        { q: "What is diversification?", a: "Spreading investments to reduce risk." },
+        { q: "Why is early investing important?", a: "Gives your money more time to compound and grow." },
+        { q: "What’s a stock?", a: "Ownership in a company." },
+        { q: "What's a bond?", a: "A loan to a company or government for fixed interest." },
+        { q: "Name one way to reduce investing risk.", a: "Diversify across asset types and industries." },
+        { q: "What should you NOT do during a downturn?", a: "Panic sell your investments." },
+        { q: "What is an ETF?", a: "Exchange-traded fund; trades like a stock, holds a bundle of assets." },
+        { q: "Why avoid 'get rich quick' schemes?", a: "They are usually high-risk or scams." },
+      ],
+      quiz: [
+        { q: "What type of asset is a bond?", options: ["Equity", "Loan", "Commodity", "Real estate"], correct: 1 },
+        { q: "How can you reduce investment risk?", options: ["Invest all in one stock", "Diversify", "Panic sell", "Ignore markets"], correct: 1 },
+        { q: "What's the benefit of starting young?", options: ["Compound growth", "Lower taxes", "Instant profit", "None"], correct: 0 },
+      ],
+    },
+    {
+      id: 4,
+      title: "Credit & Loans",
+      icon: "credit-card",
+      description: "Master the smart use of credit and loans",
+      content: `Credit, when used responsibly, allows you to borrow money for purchases, but requires discipline.
 
 Topics:
 1. How credit scores work
@@ -124,28 +126,28 @@ Topics:
 6. Risks of minimum payments
 7. The danger of high-interest debt
 8. Steps for managing and reducing debt`,
-    qna: [
-      { q: "What is a credit score?", a: "A number that represents your creditworthiness to lenders." },
-      { q: "How can you raise your score?", a: "Pay bills on time, keep balances low, limit new loans." },
-      { q: "What’s the risk of only paying minimums?", a: "High interest costs and growing debt." },
-      { q: "How do lenders use credit reports?", a: "To assess your risk when you apply for loans." },
-      { q: "What’s a secured vs unsecured loan?", a: "Secured is backed by collateral; unsecured isn’t." },
-      { q: "How do late payments affect you?", a: "They lower your score and make loans costlier." },
-      { q: "What’s a good credit utilization ratio?", a: "Keep it below 30% of your total available credit." },
-      { q: "Name a way to reduce loan interest paid.", a: "Pay more than the minimum or refinance for lower rates." },
-    ],
-    quiz: [
-      { q: "What helps build credit?", options: ["Maxing out cards", "Missing payments", "Paying on time", "Using payday loans"], correct: 2 },
-      { q: "What is a secured loan?", options: ["Backed by assets", "No collateral", "Has higher fees", "Short term"], correct: 0 },
-      { q: "What hurts your credit?", options: ["Early payments", "No credit usage", "High balances", "Low balances"], correct: 2 },
-    ],
-  },
-  {
-    id: 5,
-    title: "Financial Planning",
-    icon: "clipboard-list",
-    description: "Plan for both short and long-term financial goals",
-    content: `Financial planning gives you control over your future by organizing goals and strategies.
+      qna: [
+        { q: "What is a credit score?", a: "A number that represents your creditworthiness to lenders." },
+        { q: "How can you raise your score?", a: "Pay bills on time, keep balances low, limit new loans." },
+        { q: "What's the risk of only paying minimums?", a: "High interest costs and growing debt." },
+        { q: "How do lenders use credit reports?", a: "To assess your risk when you apply for loans." },
+        { q: "What's a secured vs unsecured loan?", a: "Secured is backed by collateral; unsecured isn't." },
+        { q: "How do late payments affect you?", a: "They lower your score and make loans costlier." },
+        { q: "What's a good credit utilization ratio?", a: "Keep it below 30% of your total available credit." },
+        { q: "Name a way to reduce loan interest paid.", a: "Pay more than the minimum or refinance for lower rates." },
+      ],
+      quiz: [
+        { q: "What helps build credit?", options: ["Maxing out cards", "Missing payments", "Paying on time", "Using payday loans"], correct: 2 },
+        { q: "What is a secured loan?", options: ["Backed by assets", "No collateral", "Has higher fees", "Short term"], correct: 0 },
+        { q: "What hurts your credit?", options: ["Early payments", "No credit usage", "High balances", "Low balances"], correct: 2 },
+      ],
+    },
+    {
+      id: 5,
+      title: "Financial Planning",
+      icon: "clipboard-list",
+      description: "Plan for both short and long-term financial goals",
+      content: `Financial planning gives you control over your future by organizing goals and strategies.
 
 Topics:
 1. Setting SMART goals (Specific, Measurable, Achievable, Relevant, Time-bound)
@@ -156,28 +158,28 @@ Topics:
 6. Managing insurance needs
 7. Estate and will planning basics
 8. Tracking and revising your plan regularly`,
-    qna: [
-      { q: "What’s a SMART goal?", a: "A goal that’s Specific, Measurable, Achievable, Relevant, and Time-bound." },
-      { q: "Why is insurance important?", a: "It protects against major financial risks and losses." },
-      { q: "What is estate planning?", a: "Arranging the management and distribution of your assets after death." },
-      { q: "Why track your plan regularly?", a: "Adjustments help you stay on course amid life changes." },
-      { q: "How early should you start retirement savings?", a: "As early as possible to maximize compound growth." },
-      { q: "How can you plan for a big purchase?", a: "Break the cost into monthly savings goals." },
-      { q: "Why have an emergency fund?", a: "It keeps you afloat when unexpected expenses arise." },
-      { q: "How do you handle multiple goals?", a: "Prioritize needs and balance savings across priorities." },
-    ],
-    quiz: [
-      { q: "What’s the first step in planning?", options: ["Buy insurance", "Set goals", "Borrow money", "Invest in stocks"], correct: 1 },
-      { q: "What’s estate planning?", options: ["Buying a house", "Setting bills", "Asset management after death", "Tracking spending"], correct: 2 },
-      { q: "When should you start retirement savings?", options: ["Later", "After 40", "Now", "Never"], correct: 2 },
-    ],
-  },
-  {
-    id: 6,
-    title: "Protecting Against Fraud",
-    icon: "shield-alt",
-    description: "Guard your finances from scams and fraud",
-    content: `Fraud protection is increasingly crucial in the digital age—know how to stay safe.
+      qna: [
+        { q: "What's a SMART goal?", a: "A goal that's Specific, Measurable, Achievable, Relevant, and Time-bound." },
+        { q: "Why is insurance important?", a: "It protects against major financial risks and losses." },
+        { q: "What is estate planning?", a: "Arranging the management and distribution of your assets after death." },
+        { q: "Why track your plan regularly?", a: "Adjustments help you stay on course amid life changes." },
+        { q: "How early should you start retirement savings?", a: "As early as possible to maximize compound growth." },
+        { q: "How can you plan for a big purchase?", a: "Break the cost into monthly savings goals." },
+        { q: "Why have an emergency fund?", a: "It keeps you afloat when unexpected expenses arise." },
+        { q: "How do you handle multiple goals?", a: "Prioritize needs and balance savings across priorities." },
+      ],
+      quiz: [
+        { q: "What's the first step in planning?", options: ["Buy insurance", "Set goals", "Borrow money", "Invest in stocks"], correct: 1 },
+        { q: "What's estate planning?", options: ["Buying a house", "Setting bills", "Asset management after death", "Tracking spending"], correct: 2 },
+        { q: "When should you start retirement savings?", options: ["Later", "After 40", "Now", "Never"], correct: 2 },
+      ],
+    },
+    {
+      id: 6,
+      title: "Protecting Against Fraud",
+      icon: "shield-alt",
+      description: "Guard your finances from scams and fraud",
+      content: `Fraud protection is increasingly crucial in the digital age—know how to stay safe.
 
 Points:
 1. Recognize suspicious emails and phishing scams
@@ -188,24 +190,23 @@ Points:
 6. Set up transaction alerts
 7. Protect sensitive info—never share passwords or PINs
 8. Report suspicious activity promptly`,
-    qna: [
-      { q: "What is phishing?", a: "Fraudulent emails/texts trying to steal your information." },
-      { q: "Why use unique passwords?", a: "Prevents one hack from compromising all your accounts." },
-      { q: "What are transaction alerts?", a: "Notifications about account activity, catching fraud early." },
-      { q: "What's a warning sign of identity theft?", a: "Unrecognized charges or credit inquiries." },
-      { q: "When should you freeze your credit?", a: "If you're not planning to apply for new credit soon." },
-      { q: "How often review accounts for fraud?", a: "Check accounts at least weekly." },
-      { q: "Name a tip for secure online banking.", a: "Use two-factor authentication and avoid public Wi-Fi." },
-      { q: "What to do if you suspect fraud?", a: "Contact your bank immediately and file a report." },
-    ],
-    quiz: [
-      { q: "How stop phishing attacks?", options: ["Click all links", "Ignore emails", "Verify sender", "Share passwords"], correct: 2 },
-      { q: "Best password practice?", options: ["Reuse passwords", "Short simple passwords", "Unique & strong passwords", "Write on paper"], correct: 2 },
-      { q: "Why check accounts?", options: ["To learn banking", "Catch fraud early", "No reason", "Spend more"], correct: 1 },
-    ],
-  },
-];
-
+      qna: [
+        { q: "What is phishing?", a: "Fraudulent emails/texts trying to steal your information." },
+        { q: "Why use unique passwords?", a: "Prevents one hack from compromising all your accounts." },
+        { q: "What are transaction alerts?", a: "Notifications about account activity, catching fraud early." },
+        { q: "What's a warning sign of identity theft?", a: "Unrecognized charges or credit inquiries." },
+        { q: "When should you freeze your credit?", a: "If you're not planning to apply for new credit soon." },
+        { q: "How often review accounts for fraud?", a: "Check accounts at least weekly." },
+        { q: "Name a tip for secure online banking.", a: "Use two-factor authentication and avoid public Wi-Fi." },
+        { q: "What to do if you suspect fraud?", a: "Contact your bank immediately and file a report." },
+      ],
+      quiz: [
+        { q: "How stop phishing attacks?", options: ["Click all links", "Ignore emails", "Verify sender", "Share passwords"], correct: 2 },
+        { q: "Best password practice?", options: ["Reuse passwords", "Short simple passwords", "Unique & strong passwords", "Write on paper"], correct: 2 },
+        { q: "Why check accounts?", options: ["To learn banking", "Catch fraud early", "No reason", "Spend more"], correct: 1 },
+      ],
+    },
+  ];
 
   const handleQuizAnswer = (questionIndex, selectedIndex) => {
     const lesson = lessons[selectedLesson]
@@ -213,12 +214,35 @@ Points:
 
     setQuizAnswered((prev) => {
       const updated = [...prev]
+      const wasPreviouslyCorrect = updated[questionIndex] === correct
       updated[questionIndex] = selectedIndex
       return updated
     })
 
-    if (selectedIndex === correct) {
-      setQuizScore((prev) => prev + 1)
+    // Update score - check if we need to add or subtract a point
+    setQuizScore((prev) => {
+      const isNowCorrect = selectedIndex === correct
+      const wasPreviouslyCorrect = quizAnswered[questionIndex] === correct
+      if (isNowCorrect && !wasPreviouslyCorrect) {
+        return prev + 1
+      } else if (!isNowCorrect && wasPreviouslyCorrect) {
+        return prev - 1
+      }
+      return prev
+    })
+  }
+
+  const goToNextQuestion = () => {
+    if (currentQuestionIndex < lessons[selectedLesson].quiz.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1)
+    } else {
+      setShowResults(true)
+    }
+  }
+
+  const goToPreviousQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(currentQuestionIndex - 1)
     }
   }
 
@@ -226,6 +250,8 @@ Points:
     setQuizActive(false)
     setQuizScore(0)
     setQuizAnswered([])
+    setCurrentQuestionIndex(0)
+    setShowResults(false)
   }
 
   const handleLessonSelect = (index) => {
@@ -249,54 +275,115 @@ Points:
             </View>
 
             <ScrollView contentContainerStyle={styles.quizContent} showsVerticalScrollIndicator={false}>
-              {quizAnswered.length === lesson.quiz.length ? (
+              {showResults ? (
                 <View style={styles.resultsContainer}>
                   <View style={styles.scoreCircle}>
                     <Text style={styles.scoreText}>
                       {quizScore}/{lesson.quiz.length}
                     </Text>
                   </View>
-                  <Text style={styles.resultsTitle}>Great Job!</Text>
+                  <Text style={styles.resultsTitle}>Quiz Complete!</Text>
                   <Text style={styles.resultsSubtitle}>
                     You scored {Math.round((quizScore / lesson.quiz.length) * 100)}%
                   </Text>
+
+                  {/* Review All Questions */}
+                  <View style={styles.reviewSection}>
+                    <Text style={styles.reviewTitle}>Review Your Answers</Text>
+                    {lesson.quiz.map((question, qIndex) => {
+                      const userAnswer = quizAnswered[qIndex]
+                      const isCorrect = userAnswer === question.correct
+                      return (
+                        <View key={qIndex} style={[styles.reviewQuestion, !isCorrect && styles.reviewQuestionWrong]}>
+                          <Text style={styles.reviewQuestionNum}>Q{qIndex + 1}</Text>
+                          <Text style={styles.reviewQuestionText}>{question.q}</Text>
+                          <View style={styles.reviewAnswerRow}>
+                            <Text style={styles.reviewAnswerLabel}>Your: </Text>
+                            <Text style={[styles.reviewAnswerText, !isCorrect && styles.reviewAnswerWrong]}>
+                              {userAnswer !== undefined ? question.options[userAnswer] : "Not answered"}
+                            </Text>
+                          </View>
+                          <View style={styles.reviewAnswerRow}>
+                            <Text style={styles.reviewAnswerLabel}>Correct: </Text>
+                            <Text style={styles.reviewAnswerCorrect}>{question.options[question.correct]}</Text>
+                          </View>
+                        </View>
+                      )
+                    })}
+                  </View>
+
                   <Pressable style={styles.retakeButton} onPress={resetQuiz}>
                     <Text style={styles.retakeButtonText}>Retake Quiz</Text>
                   </Pressable>
                   <Pressable style={styles.returnButton} onPress={() => setSelectedLesson(null)}>
-                    <Text style={styles.returnButtonText}>Back to Lesson</Text>
+                    <Text style={styles.returnButtonText}>Back to Lessons</Text>
                   </Pressable>
                 </View>
               ) : (
                 <>
-                  <Text style={styles.quizProgress}>
-                    Question {quizAnswered.length + 1} of {lesson.quiz.length}
-                  </Text>
+                  <View style={styles.quizNavigation}>
+                    <Pressable 
+                      style={[
+                        styles.navButton, 
+                        currentQuestionIndex === 0 && styles.navButtonDisabled
+                      ]} 
+                      onPress={goToPreviousQuestion}
+                      disabled={currentQuestionIndex === 0}
+                    >
+                      <Ionicons name="chevron-back" size={20} color="#666" />
+                      <Text style={styles.navButtonText}>Prev</Text>
+                    </Pressable>
+
+                    <Text style={styles.quizProgress}>
+                      Question {currentQuestionIndex + 1} of {lesson.quiz.length} 
+                    </Text>
+
+                    <Pressable 
+                      style={[
+                        styles.navButton,
+                        quizAnswered[currentQuestionIndex] === undefined && styles.navButtonDisabled
+                      ]}
+                      onPress={goToNextQuestion}
+                      disabled={quizAnswered[currentQuestionIndex] === undefined}
+                    >
+                      <Text style={styles.navButtonText}>Next</Text>
+                      <Ionicons name="chevron-forward" size={20} color="#666" />
+                    </Pressable>
+                  </View>
 
                   <View style={styles.progressBar}>
                     <View
                       style={[
                         styles.progressBarFill,
-                        { width: `${((quizAnswered.length + 1) / lesson.quiz.length) * 100}%` },
+                        { width: `${((currentQuestionIndex + 1) / lesson.quiz.length) * 100}%` },
                       ]}
                     />
                   </View>
 
-                  <Text style={styles.quizQuestion}>{lesson.quiz[quizAnswered.length].q}</Text>
+                  <Text style={styles.quizQuestion}>{lesson.quiz[currentQuestionIndex].q}</Text>
 
                   <View style={styles.optionsContainer}>
-                    {lesson.quiz[quizAnswered.length].options.map((option, index) => (
-                      <Pressable
-                        key={index}
-                        style={[
-                          styles.optionButton,
-                          quizAnswered[quizAnswered.length] === index && styles.optionButtonSelected,
-                        ]}
-                        onPress={() => handleQuizAnswer(quizAnswered.length, index)}
-                      >
-                        <Text style={styles.optionText} numberOfLines={3}>{option}</Text>
-                      </Pressable>
-                    ))}
+                    {lesson.quiz[currentQuestionIndex].options.map((option, index) => {
+                      const userAnswer = quizAnswered[currentQuestionIndex]
+                      const isSelected = userAnswer === index
+                      return (
+                        <Pressable
+                          key={index}
+                          style={[
+                            styles.optionButton,
+                            isSelected && styles.optionButtonSelected,
+                          ]}
+                          onPress={() => handleQuizAnswer(currentQuestionIndex, index)}
+                        >
+                          <Text style={[
+                            styles.optionText, 
+                            isSelected && styles.optionTextSelected
+                          ]}>
+                            {option}
+                          </Text>
+                        </Pressable>
+                      )
+                    })}
                   </View>
                 </>
               )}
@@ -572,11 +659,34 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
     paddingTop: 16,
   },
+  quizNavigation: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  navButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: '#1f6bff',
+  },
+  navButtonDisabled: {
+    backgroundColor: '#ccc',
+  },
+  navButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 14,
+  },
   quizProgress: {
-    fontSize: 12,
+    fontSize: 14,
     color: "#000",
     fontWeight: "600",
-    marginBottom: 8,
+    textAlign: 'center',
   },
   progressBar: {
     height: 6,
@@ -622,6 +732,10 @@ const styles = StyleSheet.create({
     color: "#111",
     lineHeight: 24,
   },
+  optionTextSelected: {
+    color: "#1f6bff",
+    fontWeight: '700',
+  },
   resultsContainer: {
     alignItems: "center",
     justifyContent: "center",
@@ -650,7 +764,67 @@ const styles = StyleSheet.create({
   resultsSubtitle: {
     fontSize: 16,
     color: "#666",
+    marginBottom: 32,
+  },
+  reviewSection: {
+    width: '100%',
     marginBottom: 24,
+  },
+  reviewTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#111',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  reviewQuestion: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 2,
+    borderColor: '#e9ecf5',
+  },
+  reviewQuestionWrong: {
+    borderColor: '#ff6b6b',
+    backgroundColor: '#fff5f5',
+  },
+  reviewQuestionNum: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  reviewQuestionText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#111',
+    marginBottom: 12,
+    lineHeight: 22,
+  },
+  reviewAnswerRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 4,
+  },
+  reviewAnswerLabel: {
+    fontWeight: '700',
+    color: '#555',
+    marginRight: 4,
+  },
+  reviewAnswerText: {
+    fontSize: 15,
+    color: '#111',
+    flex: 1,
+  },
+  reviewAnswerWrong: {
+    color: '#ff6b6b',
+  },
+  reviewAnswerCorrect: {
+    fontSize: 15,
+    color: '#10b981',
+    fontWeight: '600',
+    flex: 1,
   },
   retakeButton: {
     backgroundColor: "#1f6bff",
