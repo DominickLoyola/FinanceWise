@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons"
 import { router } from "expo-router"
 import { addDoc, collection, deleteDoc, doc, getDoc, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore"
 import React, { useEffect, useRef, useState } from "react"
-import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from "react-native"
+import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { generateGeminiAdvice } from "../advisors/geminiAdvisor"
 import { generateAdvice } from "../advisors/localAdvisor"
@@ -25,8 +25,25 @@ export default function AIAdvisor() {
   const scrollViewRef = useRef(null)
   const quickQuestionsRef = useRef(null)
   const contentInnerRef = useRef(null)
+  const inputRef = useRef(null)
   const [lastUserMessageY, setLastUserMessageY] = useState(0)
   const [quickQuestionsY, setQuickQuestionsY] = useState(0)
+  const [keyboardVisible, setKeyboardVisible] = useState(false)
+
+  useEffect(() => {
+    const keyboardWillShow = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
+      () => setKeyboardVisible(true)
+    )
+    const keyboardWillHide = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
+      () => setKeyboardVisible(false)
+    )
+    return () => {
+      keyboardWillShow.remove()
+      keyboardWillHide.remove()
+    }
+  }, [])
 
   useEffect(() => {
     async function fetchProfile() {
@@ -259,6 +276,11 @@ export default function AIAdvisor() {
         </View>
       </View>
 
+      <KeyboardAvoidingView 
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={0}
+      >
       <View style={styles.mainWrap}>
         {/* Sidebar - sessions (if signed in) or message history (guest) */}
         {!isSmall && (
@@ -497,8 +519,9 @@ export default function AIAdvisor() {
         </ScrollView>
       </View>
 
-      <View style={styles.inputRow}>
+      <View style={[styles.inputRow, keyboardVisible && styles.inputRowKeyboardVisible]}>
         <TextInput
+          ref={inputRef}
           style={styles.input}
           placeholder="Ask me anything about money..."
           value={input}
@@ -511,6 +534,7 @@ export default function AIAdvisor() {
           <Ionicons name="send" size={18} color="#fff" />
         </Pressable>
       </View>
+      </KeyboardAvoidingView>
 
       {/* Bottom Navigation */}
       <View style={styles.tabBar}>
@@ -584,7 +608,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   profileChipText: { fontSize: 12, color: "#166534", fontWeight: "600" },
-  content: { paddingHorizontal: 12, paddingBottom: 16, paddingTop: 24 },
+  content: { paddingHorizontal: 12, paddingBottom: 20, paddingTop: 20 },
   contentInner: {
     width: "100%",
     maxWidth: 720,
@@ -757,10 +781,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 12,
     paddingTop: 8,
+    paddingBottom: 8,
     marginBottom: 80,
     alignSelf: "center",
     width: "100%",
     maxWidth: 720,
+  },
+  inputRowKeyboardVisible: {
+    marginBottom: 8,
   },
   input: {
     flex: 1,
