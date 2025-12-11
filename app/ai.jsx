@@ -4,6 +4,7 @@ import { addDoc, collection, deleteDoc, doc, getDoc, onSnapshot, orderBy, query,
 import React, { useEffect, useRef, useState } from "react"
 import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
+import { generateGeminiAdvice } from "../advisors/geminiAdvisor"
 import { generateAdvice } from "../advisors/localAdvisor"
 import { auth, db } from "./firebaseConfig"
 
@@ -67,8 +68,8 @@ export default function AIAdvisor() {
     return () => unsubscribe()
   }, [auth.currentUser?.uid])
 
-  // Local-only mode
-  const canUseOpenAI = false
+  // Use Gemini API mode
+  const useGemini = true
   
   // Load saved conversation (web localStorage). Keeps last 100 messages.
   useEffect(() => {
@@ -202,10 +203,33 @@ export default function AIAdvisor() {
     setShouldScrollToUserMessage(true) // Trigger scroll to user message
     
     try {
-      // Local advisor only
-      const out = generateAdvice(trimmed, userProfile, messages)
-      const answer = out.answer
-      const sources = out.sources || []
+      let answer, sources;
+      
+      if (useGemini) {
+        // Use Gemini API
+        console.log("🌟 Using Gemini AI for response...");
+        try {
+          const geminiResponse = await generateGeminiAdvice(trimmed, userProfile, messages)
+          console.log("✅ Gemini response received successfully");
+          answer = geminiResponse.answer
+          sources = geminiResponse.sources || []
+        } catch (geminiError) {
+          console.error("❌ Gemini API failed, falling back to local advisor:", geminiError)
+          console.error("Fallback triggered due to:", geminiError.message);
+          // Fallback to local advisor if Gemini fails
+          const localOut = generateAdvice(trimmed, userProfile, messages)
+          answer = localOut.answer
+          sources = localOut.sources || []
+          console.log("📚 Using local advisor response instead");
+        }
+      } else {
+        // Use local advisor only
+        console.log("📚 Using local advisor (Gemini disabled)");
+        const out = generateAdvice(trimmed, userProfile, messages)
+        answer = out.answer
+        sources = out.sources || []
+      }
+      
       const nextMsgs = [...messages, { role: "user", content: trimmed }, { role: "assistant", content: answer, sources }]
       setMessages(nextMsgs)
       // Persist: Firestore if logged in; else localStorage (handled by effect)
@@ -213,6 +237,7 @@ export default function AIAdvisor() {
         await saveCurrentFS(nextMsgs, trimmed)
       }
     } catch (e) {
+      console.error("AI advisor error:", e)
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: "Sorry, I ran into an issue answering that. Please try again." },
@@ -231,7 +256,6 @@ export default function AIAdvisor() {
             <Ionicons name="sparkles" size={16} color="#fff" />
           </View>
           <Text style={styles.headerTitle}>FinanceWise</Text>
-          
         </View>
       </View>
 
@@ -519,13 +543,13 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: "#ECE9FC" },
   header: {
     paddingHorizontal: 16,
-    paddingTop: 50,
-    paddingBottom: 10,
+    paddingTop: 12,
+    paddingBottom: 12,
     backgroundColor: "#ECE9FC",
     borderBottomWidth: 0,
     borderColor: "transparent",
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
     position: "relative",
   },
@@ -535,16 +559,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   headerTopCentered: { 
-    position: "absolute",
-    left: 0,
-    right: 0,
-    alignItems: "center", // Center the logo above the text
-    gap: 6,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
     justifyContent: "center",
-    paddingLeft: 0, // Position from left edge to move it more left
   },
   headerIconWrap: { backgroundColor: "#4f46e5", borderRadius: 12, padding: 8 },
-  headerTitle: { fontSize: 28, fontWeight: "900", color: "#0f172a", textAlign: "center" },
+  headerTitle: { fontSize: 24, fontWeight: "900", color: "#0f172a", textAlign: "center" },
   headerSubtitle: { fontSize: 14, color: "#475569", textAlign: "center" },
   headerRight: {
     flex: 1,
@@ -577,7 +598,7 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
     justifyContent: "center",
     paddingHorizontal: 12,
-    paddingTop: 16,
+    paddingTop: 8,
     position: "relative",
   },
   overlay: {
@@ -600,7 +621,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     position: "absolute",
     marginLeft: 0,
-    top: -80, // Align with header
+    top: -42, // Align with new shorter header
     bottom: -139, // stop just above bottom navigation
     left: 0,
     zIndex: 20,
@@ -608,7 +629,7 @@ const styles = StyleSheet.create({
   historyFab: {
     position: "absolute",
     left: 10,
-    top: -30,
+    top: 8,
     backgroundColor: "#4f46e5",
     borderRadius: 16,
     paddingVertical: 8,
