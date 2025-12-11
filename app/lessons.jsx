@@ -758,7 +758,7 @@ const styles = StyleSheet.create({
   resultsContainer: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 40,
+    paddingVertical: 0,
   },
   scoreCircle: {
     width: 120,
@@ -767,7 +767,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#1f6bff",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 20,
+    marginBottom: 12,
   },
   scoreText: {
     fontSize: 40,
@@ -783,13 +783,13 @@ const styles = StyleSheet.create({
   resultsSubtitle: {
     fontSize: 16,
     color: "#666",
-    marginBottom: 8,
+    marginBottom: 12,
   },
   resultsFeedback: {
     fontSize: 18,
     fontWeight: "700",
     color: "#111",
-    marginBottom: 42,
+    marginBottom: 24,
     textAlign: "center",
   },
   reviewSection: {
