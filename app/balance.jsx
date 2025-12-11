@@ -161,7 +161,6 @@ export default function Balance() {
             <Text style={styles.backText}>Back to homepage</Text>
           </Pressable>
         </View>
-        <Text style={styles.appTitle}>FinanceWise</Text>
 
         {/* Current Balance widget - same look as home */}
         <LinearGradient
@@ -225,7 +224,6 @@ export default function Balance() {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#ECE9FC' },
   container: { padding: 16, alignItems: 'center' },
-  appTitle: { fontSize: 35, fontWeight: '700', marginBottom: 8 },
   balanceCard: { borderRadius: 16, padding: 16, alignSelf: 'stretch', marginBottom: 12 },
   balanceLabel: { color: '#fff', fontSize: 28, fontWeight: '700' },
   balanceValue: { color: '#fff', fontSize: 28, fontWeight: '800', marginTop: 4 },

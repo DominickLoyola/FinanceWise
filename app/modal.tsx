@@ -2,7 +2,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
 import { addDoc, collection, doc, getDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth, db } from './firebaseConfig';
 
@@ -221,17 +221,28 @@ export default function Modal() {
         </View>
         
         <Text style={styles.title}>FinanceWise</Text>
-        
-        <ScrollView style={styles.form}>
-          <Text style={styles.label}>Amount</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="$20.00"
-            placeholderTextColor="#bab8b8"
-            value={amount}
-            onChangeText={setAmount}
-            keyboardType="decimal-pad"
-          />
+
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
+        >
+          <ScrollView
+            style={styles.form}
+            contentContainerStyle={styles.formContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <Text style={styles.label}>Amount</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="$20.00"
+              placeholderTextColor="#bab8b8"
+              value={amount}
+              onChangeText={setAmount}
+              keyboardType="decimal-pad"
+              returnKeyType="next"
+            />
 
           <Text style={styles.label}>Category</Text>
           <View style={styles.categoryGrid}>
@@ -309,48 +320,50 @@ export default function Modal() {
             </View>
           )}
 
-          <Text style={styles.label}>Description (Optional)</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="What did you spend on?"
-            placeholderTextColor="#bab8b8"
-            value={description}
-            onChangeText={setDescription}
-          />
+            <Text style={styles.label}>Description (Optional)</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="What did you spend on?"
+              placeholderTextColor="#bab8b8"
+              value={description}
+              onChangeText={setDescription}
+              returnKeyType="done"
+            />
 
-          <Text style={styles.label}>Date</Text>
-          <Pressable 
-            style={styles.input} 
-            onPress={() => setShowDatePicker(true)}
-          >
-            <Text style={styles.dateText}>
-              {date.toLocaleDateString()}
-            </Text>
-          </Pressable>
+            <Text style={styles.label}>Date</Text>
+            <Pressable 
+              style={styles.input} 
+              onPress={() => setShowDatePicker(true)}
+            >
+              <Text style={styles.dateText}>
+                {date.toLocaleDateString()}
+              </Text>
+            </Pressable>
 
-          {showDatePicker && (
-            <View style={Platform.OS === 'ios' ? styles.datePickerIOS : undefined}>
-              <DateTimePicker
-                value={date}
-                mode="date"
-                display={Platform.OS === 'ios' ? 'inline' : 'default'}
-                onChange={(event, selectedDate) => {
-                  setShowDatePicker(Platform.OS === 'ios');
-                  if (selectedDate) {
-                    setDate(selectedDate);
-                  }
-                }}
-                themeVariant="light"
-                textColor="#000000"
-                accentColor="#1f6bff"
-              />
-            </View>
-          )}
+            {showDatePicker && (
+              <View style={Platform.OS === 'ios' ? styles.datePickerIOS : undefined}>
+                <DateTimePicker
+                  value={date}
+                  mode="date"
+                  display={Platform.OS === 'ios' ? 'inline' : 'default'}
+                  onChange={(event, selectedDate) => {
+                    setShowDatePicker(Platform.OS === 'ios');
+                    if (selectedDate) {
+                      setDate(selectedDate);
+                    }
+                  }}
+                  themeVariant="light"
+                  textColor="#000000"
+                  accentColor="#1f6bff"
+                />
+              </View>
+            )}
 
-          <Pressable style={styles.submitButton} onPress={handleSubmit}>
-            <Text style={styles.submitButtonText}>Save Expense</Text>
-          </Pressable>
-        </ScrollView>
+            <Pressable style={styles.submitButton} onPress={handleSubmit}>
+              <Text style={styles.submitButtonText}>Save Expense</Text>
+            </Pressable>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </View>
     </SafeAreaView>
   );
@@ -393,6 +406,9 @@ const styles = StyleSheet.create({
   },
   form: {
     flex: 1,
+  },
+  formContent: {
+    paddingBottom: 120,
   },
   label: {
     fontSize: 16,

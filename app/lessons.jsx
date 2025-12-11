@@ -270,6 +270,13 @@ Points:
 
   if (selectedLesson !== null) {
     const lesson = lessons[selectedLesson]
+    const totalQuestions = lesson.quiz.length
+    const feedbackMessage =
+      quizScore === totalQuestions
+        ? "Nice Job!"
+        : quizScore < Math.ceil((2 / 3) * totalQuestions)
+          ? "Try again for a better score."
+          : null
 
     if (quizActive) {
       return (
@@ -295,6 +302,9 @@ Points:
                   <Text style={styles.resultsSubtitle}>
                     You scored {Math.round((quizScore / lesson.quiz.length) * 100)}%
                   </Text>
+                  {feedbackMessage && (
+                    <Text style={styles.resultsFeedback}>{feedbackMessage}</Text>
+                  )}
 
                   {/* Review All Questions */}
                   <View style={styles.reviewSection}>
@@ -773,7 +783,14 @@ const styles = StyleSheet.create({
   resultsSubtitle: {
     fontSize: 16,
     color: "#666",
-    marginBottom: 32,
+    marginBottom: 8,
+  },
+  resultsFeedback: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#111",
+    marginBottom: 42,
+    textAlign: "center",
   },
   reviewSection: {
     width: '100%',
