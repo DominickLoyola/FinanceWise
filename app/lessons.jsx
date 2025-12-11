@@ -246,12 +246,21 @@ Points:
     }
   }
 
-  const resetQuiz = () => {
-    setQuizActive(false)
+  const resetQuizState = () => {
     setQuizScore(0)
     setQuizAnswered([])
     setCurrentQuestionIndex(0)
     setShowResults(false)
+  }
+
+  const startQuiz = () => {
+    resetQuizState()
+    setQuizActive(true)
+  }
+
+  const resetQuiz = () => {
+    resetQuizState()
+    setQuizActive(false)
   }
 
   const handleLessonSelect = (index) => {
@@ -312,7 +321,7 @@ Points:
                     })}
                   </View>
 
-                  <Pressable style={styles.retakeButton} onPress={resetQuiz}>
+                  <Pressable style={styles.retakeButton} onPress={startQuiz}>
                     <Text style={styles.retakeButtonText}>Retake Quiz</Text>
                   </Pressable>
                   <Pressable style={styles.returnButton} onPress={() => setSelectedLesson(null)}>
@@ -430,7 +439,7 @@ Points:
               ))}
             </View>
 
-            <Pressable style={styles.quizButton} onPress={() => setQuizActive(true)}>
+            <Pressable style={styles.quizButton} onPress={startQuiz}>
               <Ionicons name="checkmark-circle" size={20} color="#fff" />
               <Text style={styles.quizButtonText}>Take Knowledge Check</Text>
             </Pressable>
