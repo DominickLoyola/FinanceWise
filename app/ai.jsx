@@ -653,7 +653,7 @@ const styles = StyleSheet.create({
   historyFab: {
     position: "absolute",
     left: 10,
-    top: 8,
+    top: 0,
     backgroundColor: "#4f46e5",
     borderRadius: 16,
     paddingVertical: 8,
@@ -724,6 +724,7 @@ const styles = StyleSheet.create({
     borderColor: "#e5e7eb",
     borderRadius: 16,
     padding: 16,
+    marginTop: 16,
     marginBottom: 12,
     alignSelf: "center",
   },
