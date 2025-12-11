@@ -298,7 +298,7 @@ Points:
                           <Text style={styles.reviewQuestionNum}>Q{qIndex + 1}</Text>
                           <Text style={styles.reviewQuestionText}>{question.q}</Text>
                           <View style={styles.reviewAnswerRow}>
-                            <Text style={styles.reviewAnswerLabel}>Your: </Text>
+                            <Text style={styles.reviewAnswerLabel}>Your answer: </Text>
                             <Text style={[styles.reviewAnswerText, !isCorrect && styles.reviewAnswerWrong]}>
                               {userAnswer !== undefined ? question.options[userAnswer] : "Not answered"}
                             </Text>
